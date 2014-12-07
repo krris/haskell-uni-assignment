@@ -1,27 +1,33 @@
 import System.IO  
-import qualified Data.Map as Map
+import Data.Array
+import qualified Data.List as List
+
 
 -- input data - it will be read from file (TODO)
-rows = [1, 0, 2, 1, 2, 1]
+inputRows = [1, 0, 2, 1, 2, 1]
 columns = [1, 1, 2, 1, 1, 1]  
 inputData = [(0, 1), (3, 2), (3, 4), (4, 0), (4, 4), (5, 2), (5, 5)]
 
+house = "H"
+gas = "g"
+empty = "."
+delimiter = "|"
 
--- create tuples ((Int, Int), Bool) which describe an element in a table (coordinates and information if an element has value or not)
-emptyElements = Map.fromList [ ((x, y), False) | x <- [0..length columns], y <- [0..length rows]]
-houses = Map.fromList [ ((x, y), True) | (x, y) <- inputData]
+-- initialize a board with empty values
+board :: Array (Int,Int) String
+board = array ((0,0), (length columns, length inputRows)) [ ((c, r), empty) | c <- [0..length columns], r <- [0..length inputRows]]
 
--- change boolean values to some kind of description: H - house, . - empty place
-allElements = Map.union houses emptyElements
-f = \x -> if x then "|H|" else "|.|"
-allElementsWithDescription = Map.map f allElements 
+rows :: Array (Int,Int) a -> [[a]]
+rows arr = [[arr ! (r,c) | c <- [clow .. chigh]] | r <- [rlow .. rhigh]]
+  where
+    ((rlow,clow),(rhigh,chigh)) = bounds arr
 
--- pretty print for table with houses
-prettyPrintBis map (r, c) | c == (length columns - 1) && r == (length rows - 1)   = map Map.! (r, c) 
-                       | c == (length columns - 1)                                 = map Map.! (r, c) ++ "\n" ++ prettyPrintBis map (r + 1, 0)
-                       | otherwise = map Map.! (r, c) ++ prettyPrintBis map (r, c + 1)
+--rowStrings :: Show a => Array (Int,Int) a -> [String]
+rowStrings arr = [unwords (List.intersperse "|" row) | row <- rows arr]
 
+--tableString :: Show a => Array (Int,Int) a -> String
+tableString arr = unlines (rowStrings arr)
 
-prettyPrint map = prettyPrintBis map (0, 0)
+--prettyPrint :: Show a => Array (Int,Int) a -> IO ()
+prettyPrint arr = putStr (tableString arr)
 
-main = do  putStrLn (prettyPrint allElementsWithDescription)
