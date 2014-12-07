@@ -28,18 +28,24 @@ board = emptyBoard Data.Array.// [ (id, house) | id <- houses ]
 solution = board Data.Array.// [ (id, gas) | id <- gasPlacement ]
 
 
+
 -- Pretty print for a board
 rows :: Array (Int,Int) a -> [[a]]
 rows arr = [[arr ! (r,c) | c <- [clow .. chigh]] | r <- [rlow .. rhigh]]
   where
     ((rlow,clow),(rhigh,chigh)) = bounds arr
 
---rowStrings :: Show a => Array (Int,Int) a -> [String]
+rowStrings :: Array (Int,Int) String -> [String]
 rowStrings arr = [unwords (List.intersperse "|" row) | row <- rows arr]
 
---tableString :: Show a => Array (Int,Int) a -> String
+tableString :: Array (Int,Int) String -> String
 tableString arr = unlines (rowStrings arr)
 
---prettyPrint :: Show a => Array (Int,Int) a -> IO ()
+prettyPrint :: Array (Int,Int) String -> IO ()
 prettyPrint arr = putStr (tableString arr)
 
+
+main = do putStrLn "Input data:"
+          prettyPrint board
+          putStrLn "Solution:" 
+          prettyPrint solution
