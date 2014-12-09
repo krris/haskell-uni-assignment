@@ -10,14 +10,15 @@ inputRows = [1, 0, 2, 1, 2, 1]
 inputColumns :: [Int]
 inputColumns = [1, 1, 2, 1, 1, 1, 5,6]  
 houses :: [(Int, Int)]
-houses = [(0,0), (6,5)]
---houses = [(0, 1), (3, 2), (3, 4), (4, 0), (4, 4), (5, 2), (5, 5), (6, 5)]
+houses = [(0, 1), (3, 2), (3, 4), (4, 0), (4, 4), (5, 2), (5, 5), (6, 5)]
+--houses = [(0,0), (6,5)]
+
 
 gasPlacement = [(0, 2), (2, 2), (2, 4), (3, 0), (4, 3), (4, 5), (5, 1)]
 
 house = "H"
-gas = "g"
-empty = "."
+gas = "+"
+empty = " "
 delimiter = "|"
 
 
@@ -35,11 +36,11 @@ board = emptyBoard Data.Array.// [ (id, house) | id <- houses ]
 solution = board Data.Array.// [ (id, gas) | id <- gasPlacement ]
 
 -- possible gas placement
-gasPossiblePlacement = deleteAll houses
+gasPossiblePlacement = removeDups (deleteAll houses
                        [ (x + 1, y) | (x,y) <- houses, x < columnLength] ++
                        [ (x - 1, y) | (x,y) <- houses, x > 0] ++
                        [ (x, y + 1) | (x,y) <- houses, y < rowsLength] ++
-                       [ (x, y - 1) | (x,y) <- houses, y > 0]
+                       [ (x, y - 1) | (x,y) <- houses, y > 0])
 
 -- place gas on a board
 gasPossiblePlacementPretty = board Data.Array.// [ (id, gas) | id <- gasPossiblePlacement ]
@@ -88,11 +89,8 @@ appendEveryElem (x:xs) (v:vs) = [x ++ [v]] ++ appendEveryElem xs vs
 deleteAll xs ys = filter (\x -> not ( x `elem` xs)) ys
 
 
-removeDups :: Eq a => [a] -> [a]
-removeDups [x] = [x]
-removeDups (x:xs) =
-        if x == head xs then removeDups xs 
-        else [x] ++ removeDups xs
+removeDups :: (Ord a) => [a] -> [a]
+removeDups = map head . List.group . List.sort
 
 main = do putStrLn "Input data:"
           prettyPrint board
