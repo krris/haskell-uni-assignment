@@ -8,9 +8,9 @@ import qualified Data.List as List
 inputRows :: [Int]
 inputRows = [1, 0, 2, 1, 2, 1]
 inputColumns :: [Int]
-inputColumns = [1, 1, 2, 1, 1, 1, 5,6]  
+inputColumns = [1, 1, 2, 1, 1, 1, 0, 0]  
 houses :: [(Int, Int)]
-houses = [(0, 1), (3, 2), (3, 4), (4, 0), (4, 4), (5, 2), (5, 5), (6, 5)]
+houses = [(0, 1), (3, 2), (3, 4), (4, 0), (4, 4), (5, 2), (5, 5)]
 --houses = [(0,0), (6,5)]
 
 
