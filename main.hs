@@ -11,13 +11,13 @@ inputRows = [1, 0, 2, 1, 2, 1]
 inputColumns :: [Int]
 inputColumns = [1, 1, 2, 1, 1, 1]  
 houses :: [(Int, Int)]
-houses = [(0, 1), (3, 2), (3, 4), (4, 0), (4, 4), (5, 2), (5, 5)]
+houses = [(1, 0), (2, 3), (4, 3), (0, 4), (4, 4), (2, 5), (5, 5)]
 --houses = [(0,0), (6,5)]
 
 gasPlacement :: [(Int, Int)]
-gasPlacement = [(0, 2), (2, 2), (2, 4), (3, 0), (4, 3), (4, 5), (5, 1)]
+gasPlacement = [(2, 0), (2, 2), (4, 2), (0, 3), (3, 4), (5, 4), (1, 5)]
 gasPlacement2 :: [(Int, Int)]
-gasPlacement2 = [(0, 2), (2, 2), (2, 4), (3, 0), (4, 3), (4, 5), (5, 2)]
+gasPlacement2 = [(2, 0), (2, 2), (4, 2), (0, 3), (3, 4), (5, 4)]
 
 
 house = "H"
@@ -52,17 +52,23 @@ gasPossiblePlacementPretty = board Data.Array.// [ (id, gas) | id <- gasPossible
 gasCombinations = choose gasPossiblePlacement (length houses)
 
 -- args: inputColumns, gas placement
-checkColumns (x:xs) g = (List.length gasesAtColumn == x)
+checkColumns g = checkColumns' inputColumns g
+checkColumns' [] g = True
+checkColumns' (x:xs) g = if (List.length gasesAtColumn /= x) then False
+                            else checkColumns' xs g
     where gasesAtColumn = List.filter (\(c, r) -> c == id) g
           id =  fromJust (List.elemIndex x inputColumns)  
 
 
-checkRows (x:xs) g = (List.length gasesAtRow == x)
+checkRows g = checkRows' inputRows g
+checkRows' [] g = True
+checkRows' (x:xs) g = if (List.length gasesAtRow /= x) then False
+                          else checkRows' xs g
     where gasesAtRow = List.filter (\(c, r) -> r == id) g
           id =  fromJust (List.elemIndex x inputRows)  
 
 
-findSolution = filter (\x -> (checkColumns inputColumns x) == True && (checkRows inputRows x) == True) gasCombinations
+findSolution = filter (\x -> (checkColumns x) == True && (checkRows x) == True) gasCombinations
 
 
 
