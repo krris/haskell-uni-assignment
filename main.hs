@@ -54,15 +54,15 @@ gasPossiblePlacementPretty = board Data.Array.// [ (id, gas) | id <- gasPossible
 gasCombinations = choose gasPossiblePlacement (length houses)
 
 -- args: inputColumns, gas placement
-checkColumns g = checkColumns' inputColumns g
-checkColumns' [] g = trace ("tttt") $ True
-checkColumns' (x:xs) g = 
+checkColumns g = checkColumns' inputColumns g 0
+checkColumns' [] g id = True
+checkColumns' (x:xs) g id = 
     if ((List.length gasesAtColumn) == x) then 
         trace (" x: " ++ show x ++ "xs: " ++ show xs ++ " len: " ++ show (List.length gasesAtColumn) ++ " gasAtCol: " ++ show gasesAtColumn) 
-        $ checkColumns' xs g
+        $ checkColumns' xs g (id + 1)
     else False
     where gasesAtColumn = trace ("id: " ++ show id) List.filter (\(c, r) -> c == id) g
-          id = fromJust (List.elemIndex x inputColumns)  
+          
 
 
 checkRows g = checkRows' inputRows g
@@ -71,7 +71,7 @@ checkRows' (x:xs) g = if (List.length gasesAtRow /= x) then False
                           else checkRows' xs g
     where gasesAtRow = List.filter (\(c, r) -> r == id) g
           id =  fromJust (List.elemIndex x inputRows)  
-          
+
 
 
 findSolution = filter (\x -> (checkColumns x) == True && (checkRows x) == True) gasCombinations
