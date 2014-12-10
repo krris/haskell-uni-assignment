@@ -1,6 +1,7 @@
 import System.IO  
-import Data.Array
-import Data.Maybe
+import Data.Array 
+--import Data.Maybe
+import Data.Maybe (fromJust)
 import qualified Data.List as List
 
 
@@ -8,13 +9,16 @@ import qualified Data.List as List
 inputRows :: [Int]
 inputRows = [1, 0, 2, 1, 2, 1]
 inputColumns :: [Int]
-inputColumns = [1, 1, 2, 1, 1, 1, 0, 0]  
+inputColumns = [1, 1, 2, 1, 1, 1]  
 houses :: [(Int, Int)]
 houses = [(0, 1), (3, 2), (3, 4), (4, 0), (4, 4), (5, 2), (5, 5)]
 --houses = [(0,0), (6,5)]
 
-
+gasPlacement :: [(Int, Int)]
 gasPlacement = [(0, 2), (2, 2), (2, 4), (3, 0), (4, 3), (4, 5), (5, 1)]
+gasPlacement2 :: [(Int, Int)]
+gasPlacement2 = [(0, 2), (2, 2), (2, 4), (3, 0), (4, 3), (4, 5), (5, 2)]
+
 
 house = "H"
 gas = "+"
@@ -44,6 +48,23 @@ gasPossiblePlacement = removeDups (deleteAll houses
 
 -- place gas on a board
 gasPossiblePlacementPretty = board Data.Array.// [ (id, gas) | id <- gasPossiblePlacement ]
+
+gasCombinations = choose gasPossiblePlacement (length houses)
+
+-- args: inputColumns, gas placement
+checkColumns (x:xs) g = (List.length gasesAtColumn == x)
+    where gasesAtColumn = List.filter (\(c, r) -> c == id) g
+          id =  fromJust (List.elemIndex x inputColumns)  
+
+
+checkRows (x:xs) g = (List.length gasesAtRow == x)
+    where gasesAtRow = List.filter (\(c, r) -> r == id) g
+          id =  fromJust (List.elemIndex x inputRows)  
+
+
+findSolution = filter (\x -> (checkColumns inputColumns x) == True && (checkRows inputRows x) == True) gasCombinations
+
+
 
 
 
@@ -87,6 +108,11 @@ appendEveryElem (x:xs) (v:vs) = [x ++ [v]] ++ appendEveryElem xs vs
 -- Utils
 -- Delele all elements which exist in xs from ys
 deleteAll xs ys = filter (\x -> not ( x `elem` xs)) ys
+
+choose :: [b] -> Int -> [[b]]
+_      `choose` 0       = [[]]
+[]     `choose` _       =  []
+(x:xs) `choose` k       =  (x:) `fmap` (xs `choose` (k-1)) ++ xs `choose` k
 
 
 removeDups :: (Ord a) => [a] -> [a]
