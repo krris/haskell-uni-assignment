@@ -28,21 +28,8 @@ gas = "+"
 empty = " "
 delimiter = "|"
 
-
 columnLength = length inputColumns - 1
 rowsLength = length inputRows - 1
-
-
--- initialize a board with empty values
-emptyBoard :: Array (Int,Int) String
-emptyBoard = array ((0,0), (columnLength, rowsLength)) 
-        [ ((c, r), empty) | c <- [0..columnLength], r <- [0..rowsLength]]
-
--- place houses on a board
-board = emptyBoard Data.Array.// [ (id, house) | id <- houses ]
-
--- place gas on a board
-solution = board Data.Array.// [ (id, gas) | id <- gasPlacement ]
 
 -- possible gas placement
 gasPossiblePlacement = removeDups (deleteAll houses
@@ -51,10 +38,6 @@ gasPossiblePlacement = removeDups (deleteAll houses
                        [ (x, y + 1) | (x,y) <- houses, y < rowsLength] ++
                        [ (x, y - 1) | (x,y) <- houses, y > 0])
 
--- place gas on a board
-gasPossiblePlacementPretty = board Data.Array.// [ (id, gas) | id <- gasPossiblePlacement ]
-
-listForPrettyPrint list desc = board Data.Array.// [ (id, desc) | id <- list ]
 
 gasCombinations = choose gasPossiblePlacement (length houses)
 
@@ -110,6 +93,25 @@ hasTouchingGas' (x:xs) t = if x `elem` (touchingGas t) then True
                         else hasTouchingGas' xs t
 
 
+--
+-- Part of code used for pretty printing 
+--
+
+-- initialize a board with empty values
+emptyBoard :: Array (Int,Int) String
+emptyBoard = array ((0,0), (columnLength, rowsLength)) 
+        [ ((c, r), empty) | c <- [0..columnLength], r <- [0..rowsLength]]
+
+-- place houses on a board
+board = emptyBoard Data.Array.// [ (id, house) | id <- houses ]
+
+-- place gas on a board
+solution = board Data.Array.// [ (id, gas) | id <- gasPlacement ]
+
+-- place gas on a board
+gasPossiblePlacementPretty = board Data.Array.// [ (id, gas) | id <- gasPossiblePlacement ]
+
+listForPrettyPrint list desc = board Data.Array.// [ (id, desc) | id <- list ]
 
 
 
@@ -150,6 +152,7 @@ appendEveryElem (x:xs) (v:vs) = [x ++ [v]] ++ appendEveryElem xs vs
 
 
 -- Utils
+
 -- Delele all elements which exist in xs from ys
 deleteAll xs ys = filter (\x -> not ( x `elem` xs)) ys
 
