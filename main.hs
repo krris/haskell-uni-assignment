@@ -13,13 +13,14 @@ inputRows = [1, 0, 2, 1, 2, 1]
 inputColumns :: [Int]
 inputColumns = [1, 1, 2, 1, 1, 1]  
 houses :: [(Int, Int)]
-houses = [(1, 0), (2, 3), (4, 3), (0, 4), (4, 4), (2, 5), (5, 5)]
+houses =  List.sort [(1, 0), (2, 3), (4, 3), (0, 4), (4, 4), (2, 5), (5, 5)]
 --houses = [(0,0), (6,5)]
 
 gasPlacement :: [(Int, Int)]
-gasPlacement = [(2, 0), (2, 2), (4, 2), (0, 3), (3, 4), (5, 4), (1, 5)]
+gasPlacement = [(0,3),(1,5),(2,0),(2,2),(3,4),(4,2),(5,4)]
 gasPlacement2 :: [(Int, Int)]
-gasPlacement2 = [(2, 0), (2, 2), (4, 2), (0, 3), (3, 4), (5, 4)]
+gasPlacement2 = [(0,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
+wrongPlacement = [(0,5),(1,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 
 
 house = "H"
@@ -51,6 +52,8 @@ gasPossiblePlacement = removeDups (deleteAll houses
 -- place gas on a board
 gasPossiblePlacementPretty = board Data.Array.// [ (id, gas) | id <- gasPossiblePlacement ]
 
+listForPrettyPrint list desc = board Data.Array.// [ (id, desc) | id <- list ]
+
 gasCombinations = choose gasPossiblePlacement (length houses)
 
 -- args: inputColumns, gas placement
@@ -58,24 +61,51 @@ checkColumns g = checkColumns' inputColumns g 0
 checkColumns' [] g id = True
 checkColumns' (x:xs) g id = 
     if ((List.length gasesAtColumn) == x) then 
-        trace (" x: " ++ show x ++ "xs: " ++ show xs ++ " len: " ++ show (List.length gasesAtColumn) ++ " gasAtCol: " ++ show gasesAtColumn) 
-        $ checkColumns' xs g (id + 1)
+        --trace (" x: " ++ show x ++ "xs: " ++ show xs ++ " len: " ++ show (List.length gasesAtColumn) ++ " gasAtCol: " ++ show gasesAtColumn) 
+        checkColumns' xs g (id + 1)
     else False
-    where gasesAtColumn = trace ("id: " ++ show id) List.filter (\(c, r) -> c == id) g
+    where gasesAtColumn = List.filter (\(c, r) -> c == id) g
           
 
 
-checkRows g = checkRows' inputRows g
-checkRows' [] g = True
-checkRows' (x:xs) g = if (List.length gasesAtRow /= x) then False
-                          else checkRows' xs g
+checkRows g = checkRows' inputRows g 0
+checkRows' [] g id = True
+checkRows' (x:xs) g id = if (List.length gasesAtRow /= x) then False
+                          else checkRows' xs g (id + 1)
     where gasesAtRow = List.filter (\(c, r) -> r == id) g
-          id =  fromJust (List.elemIndex x inputRows)  
 
 
 
-findSolution = filter (\x -> (checkColumns x) == True && (checkRows x) == True) gasCombinations
+findSolution = filter (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False ) gasCombinations 
 
+touchingGas [] = []
+touchingGas (x:xs) = touchingGas' x ++ touchingGas xs
+
+touchingGas' (x, y) = [ 
+                        (x+1, y), 
+                        (x-1, y), 
+                        (x, y+1), 
+                        (x, y-1), 
+                        (x+1, y+1), 
+                        (x+1, y-1), 
+                        (x-1, y-1),
+                        (x-1, y+1)
+                    ]
+
+
+testT = [(0,0),(1,3),(2,2),(2,4),(3,5),(4,2),(5,4)]
+testF = [(2, 0), (2, 2), (4, 2), (0, 3), (3, 4), (5, 4), (1, 5)]
+
+
+isTouchingOneFromTheList l = isTouchingOneFromTheList' l l
+isTouchingOneFromTheList' [x] _ = False
+isTouchingOneFromTheList' (x:xs) list = if x `elem` (touchingGas list) then True
+                                    else isTouchingOneFromTheList (xs) 
+
+
+hasTouchingGas' [] _ = False
+hasTouchingGas' (x:xs) t = if x `elem` (touchingGas t) then True
+                        else hasTouchingGas' xs t
 
 
 
@@ -132,10 +162,12 @@ removeDups = map head . List.group . List.sort
 
 main = do putStrLn "Input data:"
           prettyPrint board
-          putStrLn "\nPossible gas placement:"
-          prettyPrint gasPossiblePlacementPretty
-          putStrLn "\nSolution:" 
-          prettyPrint solution
+          putStrLn "wrong solution:"
+          prettyPrint (listForPrettyPrint wrongPlacement gas)
+          --putStrLn "\nPossible gas placement:"
+          --prettyPrint gasPossiblePlacementPretty
+          --putStrLn "\nSolution:" 
+          --prettyPrint solution
 
 
 
