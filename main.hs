@@ -73,7 +73,6 @@ checkRows' (x:xs) g id = if (List.length gasesAtRow /= x) then False
 -- Generates a list of coordinates where gas cannot be placed.
 placesNotForGas [] = []
 placesNotForGas (x:xs) = placesNotForGas' x ++ placesNotForGas xs
-
 placesNotForGas' (x, y) = [ 
                         (x+1, y), 
                         (x-1, y), 
@@ -147,6 +146,8 @@ printColumnsNumbers = putStrLn (unwords (List.intersperse "|" (map show inputCol
 prettyPrint :: Array (Int,Int) String -> IO ()
 prettyPrint arr = do printColumnsNumbers
                      putStr (tableString arr)
+
+myPrettyPrint placement desc = prettyPrint (listForPrettyPrint placement desc)
 
 -- Appends to every element of double list one following element from second list
 -- Example: 
