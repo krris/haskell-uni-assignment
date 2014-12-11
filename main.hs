@@ -83,7 +83,7 @@ placesNotForGas' (x, y) = [
                         (x+1, y-1), 
                         (x-1, y-1),
                         (x-1, y+1)
-                    ]
+                        ]
 
 
 testT = [(0,0),(1,3),(2,2),(2,4),(3,5),(4,2),(5,4)]
@@ -95,8 +95,12 @@ isTouchingOneFromTheList' [x] _ = False
 isTouchingOneFromTheList' (x:xs) list = if x `elem` (placesNotForGas list) then True
                                     else isTouchingOneFromTheList (xs) 
 
+-- Get a list of solutions. 
 findSolutions = filter (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False ) gasCombinations 
 
+getSolution = getSolution' findSolutions
+getSolution' solutions = if List.length solutions == 1 then solutions !! 0
+                        else error "There is more than one solution for given data."
 
 --
 -- Part of code used for pretty printing 
