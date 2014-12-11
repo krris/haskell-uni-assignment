@@ -70,12 +70,11 @@ checkRows' (x:xs) g id = if (List.length gasesAtRow /= x) then False
     where gasesAtRow = List.filter (\(c, r) -> r == id) g
 
 
-findSolution = filter (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False ) gasCombinations 
+-- Generates a list of coordinates where gas cannot be placed.
+placesNotForGas [] = []
+placesNotForGas (x:xs) = placesNotForGas' x ++ placesNotForGas xs
 
-touchingGas [] = []
-touchingGas (x:xs) = touchingGas' x ++ touchingGas xs
-
-touchingGas' (x, y) = [ 
+placesNotForGas' (x, y) = [ 
                         (x+1, y), 
                         (x-1, y), 
                         (x, y+1), 
@@ -90,16 +89,13 @@ touchingGas' (x, y) = [
 testT = [(0,0),(1,3),(2,2),(2,4),(3,5),(4,2),(5,4)]
 testF = [(2, 0), (2, 2), (4, 2), (0, 3), (3, 4), (5, 4), (1, 5)]
 
-
+-- Checks if on the list there are two elements, which are placed next to each other
 isTouchingOneFromTheList l = isTouchingOneFromTheList' l l
 isTouchingOneFromTheList' [x] _ = False
-isTouchingOneFromTheList' (x:xs) list = if x `elem` (touchingGas list) then True
+isTouchingOneFromTheList' (x:xs) list = if x `elem` (placesNotForGas list) then True
                                     else isTouchingOneFromTheList (xs) 
 
-
-hasTouchingGas' [] _ = False
-hasTouchingGas' (x:xs) t = if x `elem` (touchingGas t) then True
-                        else hasTouchingGas' xs t
+findSolutions = filter (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False ) gasCombinations 
 
 
 --
