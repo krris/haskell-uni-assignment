@@ -13,7 +13,7 @@ inputRows = [1, 0, 2, 1, 2, 1]
 inputColumns :: [Int]
 inputColumns = [1, 1, 2, 1, 1, 1]  
 houses :: [(Int, Int)]
-houses =  List.sort [(1, 0), (2, 3), (4, 3), (0, 4), (4, 4), (2, 5), (5, 5)]
+houses = [(0,4),(1,0),(2,3),(2,5),(4,3),(4,4),(5,5)]
 --houses = [(0,0), (6,5)]
 
 gasPlacement :: [(Int, Int)]
@@ -23,9 +23,9 @@ gasPlacement2 = [(0,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 wrongPlacement = [(0,5),(1,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 
 -- House and gas descriptors used for displaying result
-house = "H"
-gas = "+"
-empty = " "
+houseDesc = "H"
+gasDesc = "+"
+emptyDesc = " "
 delimiter = "|"
 
 columnLength = length inputColumns - 1
@@ -108,16 +108,16 @@ getSolution' solutions = if List.length solutions == 1 then solutions !! 0
 -- initialize a board with empty values
 emptyBoard :: Array (Int,Int) String
 emptyBoard = array ((0,0), (columnLength, rowsLength)) 
-        [ ((c, r), empty) | c <- [0..columnLength], r <- [0..rowsLength]]
+        [ ((c, r), emptyDesc) | c <- [0..columnLength], r <- [0..rowsLength]]
 
 -- place houses on a board
-board = emptyBoard Data.Array.// [ (id, house) | id <- houses ]
+board = emptyBoard Data.Array.// [ (id, houseDesc) | id <- houses ]
 
 -- place gas on a board
-solution = board Data.Array.// [ (id, gas) | id <- gasPlacement ]
+--solution = board Data.Array.// [ (id, gas) | id <- gasPlacement ]
 
 -- place gas on a board
-gasPossiblePlacementPretty = board Data.Array.// [ (id, gas) | id <- gasPossiblePlacement ]
+--gasPossiblePlacementPretty = board Data.Array.// [ (id, gas) | id <- gasPossiblePlacement ]
 
 listForPrettyPrint list desc = board Data.Array.// [ (id, desc) | id <- list ]
 
@@ -143,11 +143,14 @@ tableString arr = unlines (rowStrings arr)
 printColumnsNumbers :: IO ()
 printColumnsNumbers = putStrLn (unwords (List.intersperse "|" (map show inputColumns)))
 
-prettyPrint :: Array (Int,Int) String -> IO ()
-prettyPrint arr = do printColumnsNumbers
-                     putStr (tableString arr)
+prettyPrint' :: Array (Int,Int) String -> IO ()
+prettyPrint' arr = do printColumnsNumbers
+                      putStr (tableString arr)
 
-myPrettyPrint placement desc = prettyPrint (listForPrettyPrint placement desc)
+prettyPrint :: [(Int, Int)] -> String -> IO ()
+prettyPrint placement desc = prettyPrint' (listForPrettyPrint placement desc)
+
+
 
 -- Appends to every element of double list one following element from second list
 -- Example: 
@@ -180,13 +183,9 @@ removeDups :: (Ord a) => [a] -> [a]
 removeDups = map head . List.group . List.sort
 
 main = do putStrLn "Input data:"
-          prettyPrint board
-          putStrLn "wrong solution:"
-          prettyPrint (listForPrettyPrint wrongPlacement gas)
-          --putStrLn "\nPossible gas placement:"
-          --prettyPrint gasPossiblePlacementPretty
-          --putStrLn "\nSolution:" 
-          --prettyPrint solution
+          prettyPrint houses houseDesc
+          putStrLn "\nSolution:" 
+          prettyPrint getSolution gasDesc
 
 
 
