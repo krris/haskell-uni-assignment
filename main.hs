@@ -71,6 +71,7 @@ checkRows' (x:xs) g id = if (List.length gasesAtRow /= x) then False
 
 
 -- Generates a list of coordinates where gas cannot be placed.
+placesNotForGas :: (Num t1, Num t) => [(t, t1)] -> [(t, t1)]
 placesNotForGas [] = []
 placesNotForGas (x:xs) = placesNotForGas' x ++ placesNotForGas xs
 placesNotForGas' (x, y) = [ 
@@ -85,8 +86,8 @@ placesNotForGas' (x, y) = [
                         ]
 
 
-testT = [(0,0),(1,3),(2,2),(2,4),(3,5),(4,2),(5,4)]
-testF = [(2, 0), (2, 2), (4, 2), (0, 3), (3, 4), (5, 4), (1, 5)]
+--testT = [(0,0),(1,3),(2,2),(2,4),(3,5),(4,2),(5,4)]
+--testF = [(2, 0), (2, 2), (4, 2), (0, 3), (3, 4), (5, 4), (1, 5)]
 
 -- Checks if on the list there are two elements, which are placed next to each other
 isTouchingOneFromTheList l = isTouchingOneFromTheList' l l
@@ -101,6 +102,8 @@ getSolution = getSolution' findSolutions
 getSolution' solutions = if List.length solutions == 1 then solutions !! 0
                         else error "There is more than one solution for given data."
 
+
+
 --
 -- Part of code used for pretty printing 
 --
@@ -111,8 +114,11 @@ emptyBoard = array ((0,0), (columnLength, rowsLength))
         [ ((c, r), emptyDesc) | c <- [0..columnLength], r <- [0..rowsLength]]
 
 -- place houses on a board
+board :: Array (Int, Int) String
 board = emptyBoard Data.Array.// [ (id, houseDesc) | id <- houses ]
 
+-- Prepares a list to be pretty printed
+listForPrettyPrint :: [(Int, Int)] -> String -> Array (Int, Int) String
 listForPrettyPrint list desc = board Data.Array.// [ (id, desc) | id <- list ]
 
 
@@ -144,21 +150,11 @@ prettyPrint placement desc = prettyPrint' (listForPrettyPrint placement desc)
 
 
 
--- Appends to every element of double list one following element from second list
--- Example: 
---      test = [[1,1,1],[2,2,2]]
---      values = [6,7]
---      appendEveryElem test values
---      > [[1,1,1,6],[2,2,2,7]]
---appendEveryElem :: [[a]] -> [a] -> [[a]]
-appendEveryElem [] _ = []
-appendEveryElem _ [] = []
-appendEveryElem (x:xs) (v:vs) = [x ++ [v]] ++ appendEveryElem xs vs
-
 
 -- Utils
 
 -- Delele all elements which exist in xs from ys
+deleteAll :: Eq a => [a] -> [a] -> [a]
 deleteAll xs ys = filter (\x -> not ( x `elem` xs)) ys
 
 -- Create all possible n-size subsets from given list
@@ -170,9 +166,24 @@ _      `choose` 0       = [[]]
 []     `choose` _       =  []
 (x:xs) `choose` k       =  (x:) `fmap` (xs `choose` (k-1)) ++ xs `choose` k
 
+-- Appends to every element of double list one following element from second list
+-- Example: 
+--      test = [[1,1,1],[2,2,2]]
+--      values = [6,7]
+--      appendEveryElem test values
+--      > [[1,1,1,6],[2,2,2,7]]
+--appendEveryElem :: [[a]] -> [a] -> [[a]]
+appendEveryElem :: [[a]] -> [a] -> [[a]]
+appendEveryElem [] _ = []
+appendEveryElem _ [] = []
+appendEveryElem (x:xs) (v:vs) = [x ++ [v]] ++ appendEveryElem xs vs
 
 removeDups :: (Ord a) => [a] -> [a]
 removeDups = map head . List.group . List.sort
+
+
+
+
 
 main = do putStrLn "Input data:"
           prettyPrint houses houseDesc
