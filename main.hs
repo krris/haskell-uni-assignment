@@ -113,15 +113,7 @@ emptyBoard = array ((0,0), (columnLength, rowsLength))
 -- place houses on a board
 board = emptyBoard Data.Array.// [ (id, houseDesc) | id <- houses ]
 
--- place gas on a board
---solution = board Data.Array.// [ (id, gas) | id <- gasPlacement ]
-
--- place gas on a board
---gasPossiblePlacementPretty = board Data.Array.// [ (id, gas) | id <- gasPossiblePlacement ]
-
 listForPrettyPrint list desc = board Data.Array.// [ (id, desc) | id <- list ]
-
-
 
 
 -- Pretty print for a board
