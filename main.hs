@@ -31,34 +31,43 @@ delimiter = "|"
 columnLength = length inputColumns - 1
 rowsLength = length inputRows - 1
 
--- possible gas placement
+-- generates all possible coordinates where gas can be placed
+gasPossiblePlacement :: [(Int, Int)]
 gasPossiblePlacement = removeDups (deleteAll houses
                        [ (x + 1, y) | (x,y) <- houses, x < columnLength] ++
                        [ (x - 1, y) | (x,y) <- houses, x > 0] ++
                        [ (x, y + 1) | (x,y) <- houses, y < rowsLength] ++
                        [ (x, y - 1) | (x,y) <- houses, y > 0])
 
-
+-- Generates a list of all possible solutions. One solution is a list of gas coordinates.
+gasCombinations :: [[(Int, Int)]]
 gasCombinations = choose gasPossiblePlacement (length houses)
 
--- args: inputColumns, gas placement
+-- Checks if given solution (gas placement) has a correct number of gas in every column
+checkColumns :: (Num a, Eq a) => 
+            [(a, t)] -> -- gasPlacement
+            Bool
 checkColumns g = checkColumns' inputColumns g 0
+
+checkColumns' :: (Num a, Eq a) => 
+              [Int] -> -- list of correct numbers for columns (inputColumns)
+              [(a, t)] -> -- solution (gas placement)
+              a -> -- current index of inputColumns
+              Bool
 checkColumns' [] g id = True
 checkColumns' (x:xs) g id = 
     if ((List.length gasesAtColumn) == x) then 
-        --trace (" x: " ++ show x ++ "xs: " ++ show xs ++ " len: " ++ show (List.length gasesAtColumn) ++ " gasAtCol: " ++ show gasesAtColumn) 
         checkColumns' xs g (id + 1)
     else False
-    where gasesAtColumn = List.filter (\(c, r) -> c == id) g
-          
+    where gasesAtColumn = List.filter (\(c, r) -> c == id) g          
 
-
+-- Checks if given solution (gas placement) has a correct number of gas in every row
+checkRows :: (Num a, Eq a) => [(t, a)] -> Bool
 checkRows g = checkRows' inputRows g 0
 checkRows' [] g id = True
 checkRows' (x:xs) g id = if (List.length gasesAtRow /= x) then False
                           else checkRows' xs g (id + 1)
     where gasesAtRow = List.filter (\(c, r) -> r == id) g
-
 
 
 findSolution = filter (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False ) gasCombinations 
