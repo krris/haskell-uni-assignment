@@ -22,7 +22,7 @@ gasPlacement2 :: [(Int, Int)]
 gasPlacement2 = [(0,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 wrongPlacement = [(0,5),(1,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 
-
+-- House and gas descriptors used for displaying result
 house = "H"
 gas = "+"
 empty = " "
@@ -31,6 +31,8 @@ delimiter = "|"
 
 columnLength = length inputColumns - 1
 rowsLength = length inputRows - 1
+
+
 -- initialize a board with empty values
 emptyBoard :: Array (Int,Int) String
 emptyBoard = array ((0,0), (columnLength, rowsLength)) 
@@ -151,7 +153,11 @@ appendEveryElem (x:xs) (v:vs) = [x ++ [v]] ++ appendEveryElem xs vs
 -- Delele all elements which exist in xs from ys
 deleteAll xs ys = filter (\x -> not ( x `elem` xs)) ys
 
-choose :: [b] -> Int -> [[b]]
+-- Create all possible n-size subsets from given list
+choose :: 
+      [b] ->  -- source list
+      Int -> -- size of subsets
+      [[b]] -- list of generated subsets
 _      `choose` 0       = [[]]
 []     `choose` _       =  []
 (x:xs) `choose` k       =  (x:) `fmap` (xs `choose` (k-1)) ++ xs `choose` k
