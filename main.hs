@@ -19,9 +19,6 @@ inputColumns = [2, 1, 1, 2, 1, 2]
 houses :: [(Int, Int)]
 houses = [(0,4),(1,1),(1,3),(2,5),(3,4),(4,0),(4,4),(4,5),(5,2)]
 
---filterCombs (\x -> isTouchingOneFromTheList x) (length houses) filterOutRowsAndColumnsWithZero 
---length $ filterCombs (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False)  (length houses) filterOutRowsAndColumnsWithZero 
-
 --inputRows :: [Int]
 --inputRows = [5, 1, 3, 2, 5, 1, 3, 1, 4, 3]
 --inputColumns :: [Int]
@@ -44,11 +41,8 @@ houses = [(0,4),(1,1),(1,3),(2,5),(3,4),(4,0),(4,4),(4,5),(5,2)]
 --          (13,2),(13,5),(13,8)
 --          ]
 
-
 gasPlacement :: [(Int, Int)]
 gasPlacement = [(0,3),(1,5),(2,0),(2,2),(3,4),(4,2),(5,4)]
-gasPlacement2 :: [(Int, Int)]
-gasPlacement2 = [(0,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 wrongPlacement = [(0,5),(1,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 
 -- House and gas descriptors used for displaying result
@@ -144,11 +138,6 @@ findSolutions = filterCombs (\x -> (checkColumns x) == True &&
 getSolution = getSolution' findSolutions
 getSolution' solutions = if List.length solutions == 1 then solutions !! 0
                         else error "There is more than one solution for given data."
-
-
-
-
-
 
 
 
