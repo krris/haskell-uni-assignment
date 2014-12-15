@@ -41,27 +41,20 @@ houses = [(0,4),(1,1),(1,3),(2,5),(3,4),(4,0),(4,4),(4,5),(5,2)]
 --          (13,2),(13,5),(13,8)
 --          ]
 
-
-
-
-
-
 gasPlacement :: [(Int, Int)]
 gasPlacement = [(0,3),(1,5),(2,0),(2,2),(3,4),(4,2),(5,4)]
-gasPlacement2 :: [(Int, Int)]
-gasPlacement2 = [(0,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 wrongPlacement = [(0,5),(1,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 
 -- House and gas descriptors used for displaying result
-houseDesc = "H"
-gasDesc = "+"
-emptyDesc = " "
-delimiter = "|"
+houseDesc   = "H"
+gasDesc     = "+"
+emptyDesc   = " "
+delimiter   = "|"
 
 columnLength = length inputColumns - 1
-rowsLength = length inputRows - 1
+rowsLength   = length inputRows - 1
 
--- generates all possible coordinates where gas can be placed
+-- Generates all possible coordinates where gas can be placed
 gasPossiblePlacement :: [(Int, Int)]
 gasPossiblePlacement = removeDups (deleteAll houses
                        [ (x + 1, y) | (x,y) <- houses, x < columnLength] ++
@@ -69,9 +62,19 @@ gasPossiblePlacement = removeDups (deleteAll houses
                        [ (x, y + 1) | (x,y) <- houses, y < rowsLength] ++
                        [ (x, y - 1) | (x,y) <- houses, y > 0])
 
--- Generates a list of all possible solutions. One solution is a list of gas coordinates.
-gasCombinations :: [[(Int, Int)]]
-gasCombinations = choose gasPossiblePlacement (length houses)
+
+-- Get all indices of elements which has value equal to 0 from a list  
+getZeroIndices  xs          = getZeroIndices' 0 xs
+getZeroIndices' _   []      = []
+getZeroIndices' n   (x:xs)  = if x == 0 then [n] ++ getZeroIndices' (n+1) xs
+                              else getZeroIndices' (n+1) xs
+
+-- Filter out every gas which is placed in column/row labeled with 0
+filterOutRowsAndColumnsWithZero = List.filter (\(c, r) -> not (r `elem` getZeroIndices inputRows) && 
+                                                          not (c `elem` getZeroIndices inputColumns))
+                                  gasPossiblePlacement
+
+
 
 -- Checks if given solution (gas placement) has a correct number of gas in every column
 checkColumns :: (Num a, Eq a) => 
@@ -80,53 +83,57 @@ checkColumns :: (Num a, Eq a) =>
 checkColumns g = checkColumns' inputColumns g 0
 
 checkColumns' :: (Num a, Eq a) => 
-              [Int] -> -- list of correct numbers for columns (inputColumns)
+              [Int] -> -- list of columns labels
               [(a, t)] -> -- solution (gas placement)
               a -> -- current index of inputColumns
               Bool
-checkColumns' [] g id = True
+checkColumns' []     g id = True
 checkColumns' (x:xs) g id = 
-    if ((List.length gasesAtColumn) == x) then 
+    if ((List.length gasesAtColumn) <= x) then 
         checkColumns' xs g (id + 1)
     else False
     where gasesAtColumn = List.filter (\(c, r) -> c == id) g          
 
+
 -- Checks if given solution (gas placement) has a correct number of gas in every row
 checkRows :: (Num a, Eq a) => [(t, a)] -> Bool
 checkRows g = checkRows' inputRows g 0
-checkRows' [] g id = True
-checkRows' (x:xs) g id = if (List.length gasesAtRow /= x) then False
-                          else checkRows' xs g (id + 1)
+
+checkRows' :: (Num a, Eq a) => 
+              [Int] -> -- list of rows labels
+              [(t, a)] -> -- solution (gas placement)
+              a -> -- current index of inputRows
+              Bool
+checkRows' []     g id = True
+checkRows' (x:xs) g id = if (List.length gasesAtRow <= x) then 
+                              checkRows' xs g (id + 1)
+                          else False
     where gasesAtRow = List.filter (\(c, r) -> r == id) g
 
 
--- Generates a list of coordinates where gas cannot be placed.
+-- Generates a list of coordinates where gas cannot be placed (every place around gas)
 placesNotForGas :: (Num t1, Num t) => [(t, t1)] -> [(t, t1)]
-placesNotForGas [] = []
-placesNotForGas (x:xs) = placesNotForGas' x ++ placesNotForGas xs
+placesNotForGas []      = []
+placesNotForGas (x:xs)  = placesNotForGas' x ++ placesNotForGas xs
 placesNotForGas' (x, y) = [ 
-                        (x+1, y), 
-                        (x-1, y), 
-                        (x, y+1), 
-                        (x, y-1), 
-                        (x+1, y+1), 
-                        (x+1, y-1), 
-                        (x-1, y-1),
-                        (x-1, y+1)
-                        ]
+                            (x+1, y), (x-1, y), 
+                            (x, y+1), (x, y-1), 
+                            (x+1, y+1), (x+1, y-1), 
+                            (x-1, y-1), (x-1, y+1)
+                          ]
 
-
---testT = [(0,0),(1,3),(2,2),(2,4),(3,5),(4,2),(5,4)]
---testF = [(2, 0), (2, 2), (4, 2), (0, 3), (3, 4), (5, 4), (1, 5)]
-
--- Checks if on the list there are two elements, which are placed next to each other
-isTouchingOneFromTheList l = isTouchingOneFromTheList' l l
-isTouchingOneFromTheList' [x] _ = False
+-- Checks if on the list there are two elements (gas), which are placed next to each other
+isTouchingOneFromTheList  l           = isTouchingOneFromTheList' l l
+isTouchingOneFromTheList' [x]    _    = False
 isTouchingOneFromTheList' (x:xs) list = if x `elem` (placesNotForGas list) then True
                                     else isTouchingOneFromTheList (xs) 
 
--- Get a list of solutions. 
-findSolutions = filter (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False ) gasCombinations 
+-- Generates a list of all solutions. One solution is a list of gas coordinates.
+findSolutions :: [[(Int, Int)]]
+findSolutions = filterCombs (\x -> (checkColumns x) == True && 
+                                   (checkRows x) == True &&
+                                   (isTouchingOneFromTheList x) == False)
+                  (length houses) filterOutRowsAndColumnsWithZero 
 
 getSolution = getSolution' findSolutions
 getSolution' solutions = if List.length solutions == 1 then solutions !! 0
@@ -177,24 +184,14 @@ prettyPrint' arr = do printColumnsNumbers
 
 prettyPrint :: [(Int, Int)] -> String -> IO ()
 prettyPrint placement desc = prettyPrint' (listForPrettyPrint placement desc)
-
-
-
-
 -- Utils
 
 -- Delele all elements which exist in xs from ys
 deleteAll :: Eq a => [a] -> [a] -> [a]
 deleteAll xs ys = filter (\x -> not ( x `elem` xs)) ys
 
--- Create all possible n-size subsets from given list
-choose :: 
-      [b] ->  -- source list
-      Int -> -- size of subsets
-      [[b]] -- list of generated subsets
-_      `choose` 0       = [[]]
-[]     `choose` _       =  []
-(x:xs) `choose` k       =  (x:) `fmap` (xs `choose` (k-1)) ++ xs `choose` k
+
+
 
 -- Appends to every element of double list one following element from second list
 -- Example: 
@@ -204,13 +201,30 @@ _      `choose` 0       = [[]]
 --      > [[1,1,1,6],[2,2,2,7]]
 --appendEveryElem :: [[a]] -> [a] -> [[a]]
 appendEveryElem :: [[a]] -> [a] -> [[a]]
-appendEveryElem [] _ = []
-appendEveryElem _ [] = []
+appendEveryElem []      _     = []
+appendEveryElem _       []    = []
 appendEveryElem (x:xs) (v:vs) = [x ++ [v]] ++ appendEveryElem xs vs
 
+-- Remove duplicates from a list
 removeDups :: (Ord a) => [a] -> [a]
 removeDups = map head . List.group . List.sort
 
+zapWith f    []     ys  = ys
+zapWith f    xs     []  = xs
+zapWith f (x:xs) (y:ys) = f x y : zapWith f xs ys
+
+-- Create all possible n-size subsets from given list which satisfy given predicate
+filterCombs :: ([a] -> Bool) -> Int -> [a] -> [[a]]
+filterCombs p n xs | n > length xs = [] 
+filterCombs p n xs = go xs id !! n where
+    go    []  ds = [[[]]]
+    go (x:xs) ds
+        | p (ds' []) = zapWith (++) ([] : map (map (x:)) with) without
+        | otherwise  = without
+        where
+            ds'     = ds . (x:)
+            with    = go xs ds'
+            without = go xs ds
 
 
 
