@@ -80,10 +80,7 @@ filterOutRowsAndColumnsWithZero = List.filter (\(c, r) -> not (r `elem` getZeroI
                                                           not (c `elem` getZeroIndices inputColumns))
                                   gasPossiblePlacement
 
--- Generates a list of all possible solutions. One solution is a list of gas coordinates.
-gasCombinations :: [[(Int, Int)]]
-gasCombinations = choose filterOutRowsAndColumnsWithZero (length houses)
---gasCombinations = filterCombs (\x -> isTouchingOneFromTheList x) (length houses) filterOutRowsAndColumnsWithZero
+
 
 -- Checks if given solution (gas placement) has a correct number of gas in every column
 checkColumns :: (Num a, Eq a) => 
@@ -120,7 +117,7 @@ checkRows' (x:xs) g id = if (List.length gasesAtRow <= x) then
     where gasesAtRow = List.filter (\(c, r) -> r == id) g
 
 
--- Generates a list of coordinates where gas cannot be placed.
+-- Generates a list of coordinates where gas cannot be placed (every place around gas)
 placesNotForGas :: (Num t1, Num t) => [(t, t1)] -> [(t, t1)]
 placesNotForGas []      = []
 placesNotForGas (x:xs)  = placesNotForGas' x ++ placesNotForGas xs
@@ -131,20 +128,26 @@ placesNotForGas' (x, y) = [
                             (x-1, y-1), (x-1, y+1)
                           ]
 
-
--- Checks if on the list there are two elements, which are placed next to each other
+-- Checks if on the list there are two elements (gas), which are placed next to each other
 isTouchingOneFromTheList  l           = isTouchingOneFromTheList' l l
 isTouchingOneFromTheList' [x]    _    = False
 isTouchingOneFromTheList' (x:xs) list = if x `elem` (placesNotForGas list) then True
                                     else isTouchingOneFromTheList (xs) 
 
+-- Generates a list of all solutions. One solution is a list of gas coordinates.
+findSolutions :: [[(Int, Int)]]
+findSolutions = filterCombs (\x -> (checkColumns x) == True && 
+                                   (checkRows x) == True &&
+                                   (isTouchingOneFromTheList x) == False)
+                  (length houses) filterOutRowsAndColumnsWithZero 
 
--- Get a list of solutions. 
-findSolutions = filter (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False) gasCombinations 
--- (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False )
 getSolution = getSolution' findSolutions
 getSolution' solutions = if List.length solutions == 1 then solutions !! 0
                         else error "There is more than one solution for given data."
+
+
+
+
 
 
 
@@ -213,6 +216,7 @@ appendEveryElem []      _     = []
 appendEveryElem _       []    = []
 appendEveryElem (x:xs) (v:vs) = [x ++ [v]] ++ appendEveryElem xs vs
 
+-- Remove duplicates from a list
 removeDups :: (Ord a) => [a] -> [a]
 removeDups = map head . List.group . List.sort
 
