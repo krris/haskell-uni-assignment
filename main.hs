@@ -52,13 +52,13 @@ gasPlacement2 = [(0,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 wrongPlacement = [(0,5),(1,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 
 -- House and gas descriptors used for displaying result
-houseDesc = "H"
-gasDesc = "+"
-emptyDesc = " "
-delimiter = "|"
+houseDesc   = "H"
+gasDesc     = "+"
+emptyDesc   = " "
+delimiter   = "|"
 
 columnLength = length inputColumns - 1
-rowsLength = length inputRows - 1
+rowsLength   = length inputRows - 1
 
 -- Generates all possible coordinates where gas can be placed
 gasPossiblePlacement :: [(Int, Int)]
@@ -70,10 +70,10 @@ gasPossiblePlacement = removeDups (deleteAll houses
 
 
 -- Get all indices of elements which has value equal to 0 from a list  
-getZeroIndices xs = getZeroIndices' 0 xs
-getZeroIndices' _ [] = []
-getZeroIndices' n (x:xs) = if x == 0 then [n] ++ getZeroIndices' (n+1) xs
-                     else getZeroIndices' (n+1) xs
+getZeroIndices  xs          = getZeroIndices' 0 xs
+getZeroIndices' _   []      = []
+getZeroIndices' n   (x:xs)  = if x == 0 then [n] ++ getZeroIndices' (n+1) xs
+                              else getZeroIndices' (n+1) xs
 
 -- Filter out every gas which is placed in column/row labeled with 0
 filterOutRowsAndColumnsWithZero = List.filter (\(c, r) -> not (r `elem` getZeroIndices inputRows) && 
@@ -96,7 +96,7 @@ checkColumns' :: (Num a, Eq a) =>
               [(a, t)] -> -- solution (gas placement)
               a -> -- current index of inputColumns
               Bool
-checkColumns' [] g id = True
+checkColumns' []     g id = True
 checkColumns' (x:xs) g id = 
     if ((List.length gasesAtColumn) <= x) then 
         checkColumns' xs g (id + 1)
@@ -113,7 +113,7 @@ checkRows' :: (Num a, Eq a) =>
               [(t, a)] -> -- solution (gas placement)
               a -> -- current index of inputRows
               Bool
-checkRows' [] g id = True
+checkRows' []     g id = True
 checkRows' (x:xs) g id = if (List.length gasesAtRow <= x) then 
                               checkRows' xs g (id + 1)
                           else False
@@ -122,8 +122,8 @@ checkRows' (x:xs) g id = if (List.length gasesAtRow <= x) then
 
 -- Generates a list of coordinates where gas cannot be placed.
 placesNotForGas :: (Num t1, Num t) => [(t, t1)] -> [(t, t1)]
-placesNotForGas [] = []
-placesNotForGas (x:xs) = placesNotForGas' x ++ placesNotForGas xs
+placesNotForGas []      = []
+placesNotForGas (x:xs)  = placesNotForGas' x ++ placesNotForGas xs
 placesNotForGas' (x, y) = [ 
                             (x+1, y), (x-1, y), 
                             (x, y+1), (x, y-1), 
@@ -133,8 +133,8 @@ placesNotForGas' (x, y) = [
 
 
 -- Checks if on the list there are two elements, which are placed next to each other
-isTouchingOneFromTheList l = isTouchingOneFromTheList' l l
-isTouchingOneFromTheList' [x] _ = False
+isTouchingOneFromTheList  l           = isTouchingOneFromTheList' l l
+isTouchingOneFromTheList' [x]    _    = False
 isTouchingOneFromTheList' (x:xs) list = if x `elem` (placesNotForGas list) then True
                                     else isTouchingOneFromTheList (xs) 
 
@@ -198,14 +198,8 @@ prettyPrint placement desc = prettyPrint' (listForPrettyPrint placement desc)
 deleteAll :: Eq a => [a] -> [a] -> [a]
 deleteAll xs ys = filter (\x -> not ( x `elem` xs)) ys
 
--- Create all possible n-size subsets from given list
-choose :: 
-      [b] ->  -- source list
-      Int -> -- size of subsets
-      [[b]] -- list of generated subsets
-_      `choose` 0       = [[]]
-[]     `choose` _       =  []
-(x:xs) `choose` k       =  (x:) `fmap` (xs `choose` (k-1)) ++ xs `choose` k
+
+
 
 -- Appends to every element of double list one following element from second list
 -- Example: 
@@ -215,8 +209,8 @@ _      `choose` 0       = [[]]
 --      > [[1,1,1,6],[2,2,2,7]]
 --appendEveryElem :: [[a]] -> [a] -> [[a]]
 appendEveryElem :: [[a]] -> [a] -> [[a]]
-appendEveryElem [] _ = []
-appendEveryElem _ [] = []
+appendEveryElem []      _     = []
+appendEveryElem _       []    = []
 appendEveryElem (x:xs) (v:vs) = [x ++ [v]] ++ appendEveryElem xs vs
 
 removeDups :: (Ord a) => [a] -> [a]
@@ -226,6 +220,7 @@ zapWith f    []     ys  = ys
 zapWith f    xs     []  = xs
 zapWith f (x:xs) (y:ys) = f x y : zapWith f xs ys
 
+-- Create all possible n-size subsets from given list which satisfy given predicate
 filterCombs :: ([a] -> Bool) -> Int -> [a] -> [[a]]
 filterCombs p n xs | n > length xs = [] 
 filterCombs p n xs = go xs id !! n where
