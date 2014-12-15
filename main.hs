@@ -12,38 +12,37 @@ import Debug.Trace
 --houses :: [(Int, Int)]
 --houses = [(0,4),(1,0),(2,3),(2,5),(4,3),(4,4),(5,5)]
 
-inputRows :: [Int]
-inputRows = [1, 2, 0, 3, 0, 3]
-inputColumns :: [Int]
-inputColumns = [2, 1, 1, 2, 1, 2]  
-houses :: [(Int, Int)]
-houses = [(0,4),(1,1),(1,3),(2,5),(3,4),(4,0),(4,4),(4,5),(5,2)]
-
 --inputRows :: [Int]
---inputRows = [5, 1, 3, 2, 5, 1, 3, 1, 4, 3]
+--inputRows = [1, 2, 0, 3, 0, 3]
 --inputColumns :: [Int]
---inputColumns = [4, 0, 3, 1, 2, 1, 3, 2, 0, 5, 0, 3, 1, 3]  
+--inputColumns = [2, 1, 1, 2, 1, 2]  
 --houses :: [(Int, Int)]
---houses = [
---          (0,0), (0,8),
---          (1,0), (1,3), (1,4), (1,5),
---          (2,7),
---          (3,5),
---          (4,9),
---          (5,0),(5,3),
---          (6,3),(6,7),(6,8),
---          (7,0),
---          (8,2),(8,4),
---          (9,1),(9,5),(9,9),
---          (10,4),
---          (11,5),(11,7),
---          (12,1),(12,2),
---          (13,2),(13,5),(13,8)
---          ]
+--houses = [(0,4),(1,1),(1,3),(2,5),(3,4),(4,0),(4,4),(4,5),(5,2)]
+
+--filterCombs (\x -> isTouchingOneFromTheList x) (length houses) filterOutRowsAndColumnsWithZero 
 
 
-
-
+inputRows :: [Int]
+inputRows = [5, 1, 3, 2, 5, 1, 3, 1, 4, 3]
+inputColumns :: [Int]
+inputColumns = [4, 0, 3, 1, 2, 1, 3, 2, 0, 5, 0, 3, 1, 3]  
+houses :: [(Int, Int)]
+houses = [
+          (0,0), (0,8),
+          (1,0), (1,3), (1,4), (1,5),
+          (2,7),
+          (3,5),
+          (4,9),
+          (5,0),(5,3),
+          (6,3),(6,7),(6,8),
+          (7,0),
+          (8,2),(8,4),
+          (9,1),(9,5),(9,9),
+          (10,4),
+          (11,5),(11,7),
+          (12,1),(12,2),
+          (13,2),(13,5),(13,8)
+          ]
 
 
 gasPlacement :: [(Int, Int)]
@@ -69,9 +68,19 @@ gasPossiblePlacement = removeDups (deleteAll houses
                        [ (x, y + 1) | (x,y) <- houses, y < rowsLength] ++
                        [ (x, y - 1) | (x,y) <- houses, y > 0])
 
+
+getZeroId x = getZeroId' 0 x 
+getZeroId' _ [] = []
+getZeroId' n (x:xs) = if x == 0 then [n] ++ getZeroId' (n+1) xs
+                     else getZeroId' (n+1) xs
+
+filterOutRowsWithZero = List.filter (\(c, r) -> not (r `elem` getZeroId inputRows)) gasPossiblePlacement
+filterOutRowsAndColumnsWithZero = List.filter (\(c, r) -> not (c `elem` getZeroId inputColumns)) filterOutRowsWithZero
+
 -- Generates a list of all possible solutions. One solution is a list of gas coordinates.
 gasCombinations :: [[(Int, Int)]]
-gasCombinations = choose gasPossiblePlacement (length houses)
+gasCombinations = filterCombs (\x -> isTouchingOneFromTheList x) (length houses) filterOutRowsAndColumnsWithZero
+--gasCombinations = choose filterOutRowsAndColumnsWithZero (length houses)
 
 -- Checks if given solution (gas placement) has a correct number of gas in every column
 checkColumns :: (Num a, Eq a) => 
@@ -86,7 +95,7 @@ checkColumns' :: (Num a, Eq a) =>
               Bool
 checkColumns' [] g id = True
 checkColumns' (x:xs) g id = 
-    if ((List.length gasesAtColumn) == x) then 
+    if ((List.length gasesAtColumn) <= x) then 
         checkColumns' xs g (id + 1)
     else False
     where gasesAtColumn = List.filter (\(c, r) -> c == id) g          
@@ -95,7 +104,7 @@ checkColumns' (x:xs) g id =
 checkRows :: (Num a, Eq a) => [(t, a)] -> Bool
 checkRows g = checkRows' inputRows g 0
 checkRows' [] g id = True
-checkRows' (x:xs) g id = if (List.length gasesAtRow /= x) then False
+checkRows' (x:xs) g id = if (List.length gasesAtRow > x) then False
                           else checkRows' xs g (id + 1)
     where gasesAtRow = List.filter (\(c, r) -> r == id) g
 
@@ -125,12 +134,14 @@ isTouchingOneFromTheList' [x] _ = False
 isTouchingOneFromTheList' (x:xs) list = if x `elem` (placesNotForGas list) then True
                                     else isTouchingOneFromTheList (xs) 
 
--- Get a list of solutions. 
-findSolutions = filter (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False ) gasCombinations 
 
+-- Get a list of solutions. 
+findSolutions = filter (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False) gasCombinations 
+-- (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False )
 getSolution = getSolution' findSolutions
 getSolution' solutions = if List.length solutions == 1 then solutions !! 0
                         else error "There is more than one solution for given data."
+
 
 
 
@@ -177,10 +188,6 @@ prettyPrint' arr = do printColumnsNumbers
 
 prettyPrint :: [(Int, Int)] -> String -> IO ()
 prettyPrint placement desc = prettyPrint' (listForPrettyPrint placement desc)
-
-
-
-
 -- Utils
 
 -- Delele all elements which exist in xs from ys
@@ -211,6 +218,21 @@ appendEveryElem (x:xs) (v:vs) = [x ++ [v]] ++ appendEveryElem xs vs
 removeDups :: (Ord a) => [a] -> [a]
 removeDups = map head . List.group . List.sort
 
+zapWith f    []     ys  = ys
+zapWith f    xs     []  = xs
+zapWith f (x:xs) (y:ys) = f x y : zapWith f xs ys
+
+filterCombs :: ([a] -> Bool) -> Int -> [a] -> [[a]]
+filterCombs p n xs | n > length xs = [] 
+filterCombs p n xs = go xs id !! n where
+    go    []  ds = [[[]]]
+    go (x:xs) ds
+        | p (ds' []) = zapWith (++) ([] : map (map (x:)) with) without
+        | otherwise  = without
+        where
+            ds'     = ds . (x:)
+            with    = go xs ds'
+            without = go xs ds
 
 
 
