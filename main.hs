@@ -12,37 +12,37 @@ import Debug.Trace
 --houses :: [(Int, Int)]
 --houses = [(0,4),(1,0),(2,3),(2,5),(4,3),(4,4),(5,5)]
 
---inputRows :: [Int]
---inputRows = [1, 2, 0, 3, 0, 3]
---inputColumns :: [Int]
---inputColumns = [2, 1, 1, 2, 1, 2]  
---houses :: [(Int, Int)]
---houses = [(0,4),(1,1),(1,3),(2,5),(3,4),(4,0),(4,4),(4,5),(5,2)]
+inputRows :: [Int]
+inputRows = [1, 2, 0, 3, 0, 3]
+inputColumns :: [Int]
+inputColumns = [2, 1, 1, 2, 1, 2]  
+houses :: [(Int, Int)]
+houses = [(0,4),(1,1),(1,3),(2,5),(3,4),(4,0),(4,4),(4,5),(5,2)]
 
 --filterCombs (\x -> isTouchingOneFromTheList x) (length houses) filterOutRowsAndColumnsWithZero 
+--length $ filterCombs (\x -> (checkColumns x) == True && (checkRows x) == True && (isTouchingOneFromTheList x) == False)  (length houses) filterOutRowsAndColumnsWithZero 
 
-
-inputRows :: [Int]
-inputRows = [5, 1, 3, 2, 5, 1, 3, 1, 4, 3]
-inputColumns :: [Int]
-inputColumns = [4, 0, 3, 1, 2, 1, 3, 2, 0, 5, 0, 3, 1, 3]  
-houses :: [(Int, Int)]
-houses = [
-          (0,0), (0,8),
-          (1,0), (1,3), (1,4), (1,5),
-          (2,7),
-          (3,5),
-          (4,9),
-          (5,0),(5,3),
-          (6,3),(6,7),(6,8),
-          (7,0),
-          (8,2),(8,4),
-          (9,1),(9,5),(9,9),
-          (10,4),
-          (11,5),(11,7),
-          (12,1),(12,2),
-          (13,2),(13,5),(13,8)
-          ]
+--inputRows :: [Int]
+--inputRows = [5, 1, 3, 2, 5, 1, 3, 1, 4, 3]
+--inputColumns :: [Int]
+--inputColumns = [4, 0, 3, 1, 2, 1, 3, 2, 0, 5, 0, 3, 1, 3]  
+--houses :: [(Int, Int)]
+--houses = [
+--          (0,0), (0,8),
+--          (1,0), (1,3), (1,4), (1,5),
+--          (2,7),
+--          (3,5),
+--          (4,9),
+--          (5,0),(5,3),
+--          (6,3),(6,7),(6,8),
+--          (7,0),
+--          (8,2),(8,4),
+--          (9,1),(9,5),(9,9),
+--          (10,4),
+--          (11,5),(11,7),
+--          (12,1),(12,2),
+--          (13,2),(13,5),(13,8)
+--          ]
 
 
 gasPlacement :: [(Int, Int)]
@@ -60,7 +60,7 @@ delimiter = "|"
 columnLength = length inputColumns - 1
 rowsLength = length inputRows - 1
 
--- generates all possible coordinates where gas can be placed
+-- Generates all possible coordinates where gas can be placed
 gasPossiblePlacement :: [(Int, Int)]
 gasPossiblePlacement = removeDups (deleteAll houses
                        [ (x + 1, y) | (x,y) <- houses, x < columnLength] ++
@@ -69,13 +69,16 @@ gasPossiblePlacement = removeDups (deleteAll houses
                        [ (x, y - 1) | (x,y) <- houses, y > 0])
 
 
-getZeroId x = getZeroId' 0 x 
-getZeroId' _ [] = []
-getZeroId' n (x:xs) = if x == 0 then [n] ++ getZeroId' (n+1) xs
-                     else getZeroId' (n+1) xs
+-- Get all indices of elements which has value equal to 0 from a list  
+getZeroIndices xs = getZeroIndices' 0 xs
+getZeroIndices' _ [] = []
+getZeroIndices' n (x:xs) = if x == 0 then [n] ++ getZeroIndices' (n+1) xs
+                     else getZeroIndices' (n+1) xs
 
-filterOutRowsWithZero = List.filter (\(c, r) -> not (r `elem` getZeroId inputRows)) gasPossiblePlacement
-filterOutRowsAndColumnsWithZero = List.filter (\(c, r) -> not (c `elem` getZeroId inputColumns)) filterOutRowsWithZero
+-- Filter out every gas which is placed in column/row labeled with 0
+filterOutRowsAndColumnsWithZero = List.filter (\(c, r) -> not (r `elem` getZeroIndices inputRows) && 
+                                                          not (c `elem` getZeroIndices inputColumns))
+                                  gasPossiblePlacement
 
 -- Generates a list of all possible solutions. One solution is a list of gas coordinates.
 gasCombinations :: [[(Int, Int)]]
