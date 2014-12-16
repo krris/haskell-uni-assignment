@@ -1,9 +1,9 @@
 import System.IO  
 import Data.Array 
 import Data.Maybe (fromJust)
-import qualified Data.List as List
-import Debug.Trace
 import Utils
+import qualified Data.List as List
+
 
  --input data - it will be read from file (TODO)
 --inputRows :: [Int]
@@ -40,6 +40,28 @@ houses = [(0,4),(1,1),(1,3),(2,5),(3,4),(4,0),(4,4),(4,5),(5,2)]
 --          (11,5),(11,7),
 --          (12,1),(12,2),
 --          (13,2),(13,5),(13,8)
+--          ]
+
+--inputRows :: [Int]
+--inputRows = [5, 1, 4, 1, 4, 2, 4, 2, 1, 4]
+--inputColumns :: [Int]
+--inputColumns = [3,2,0,5,0,5,0,2,2,3,0,2,2,2]  
+--houses :: [(Int, Int)]
+--houses = [
+--          (0,1), (0,5), (0, 6),
+--          (1,3), (1,9),
+--          (2,5), (2,9),
+
+--          (4,0), (4,2), (4,3), (4,4), (4,7),
+--          (5,5),
+--          (6,0),(6,9),
+--          (7,0), (7,6),
+--          (8,2),(8,5),(8,8),
+--          (9,5),
+--          (10,0),
+--          (11,2),
+--          (12,5),(12,6), (12,8),
+--          (13,0)
 --          ]
 
 gasPlacement :: [(Int, Int)]
@@ -142,9 +164,8 @@ getSolution' solutions = if List.length solutions == 1 then solutions !! 0
 
 
 
---
--- Part of code used for pretty printing 
---
+
+
 
 -- initialize a board with empty values
 emptyBoard :: Array (Int,Int) String
@@ -158,7 +179,6 @@ board = emptyBoard Data.Array.// [ (id, houseDesc) | id <- houses ]
 -- Prepares a list to be pretty printed
 listForPrettyPrint :: [(Int, Int)] -> String -> Array (Int, Int) String
 listForPrettyPrint list desc = board Data.Array.// [ (id, desc) | id <- list ]
-
 
 -- Pretty print for a board
 rows :: Array (Int,Int) a -> [[a]]
@@ -187,33 +207,8 @@ prettyPrint :: [(Int, Int)] -> String -> IO ()
 prettyPrint placement desc = prettyPrint' (listForPrettyPrint placement desc)
 
 
-
-
-
 main = do putStrLn "Input data:"
           prettyPrint houses houseDesc
           putStrLn "\nSolution:" 
           prettyPrint getSolution gasDesc
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
