@@ -12,7 +12,6 @@ deleteAll xs ys = filter (\x -> not ( x `elem` xs)) ys
 --      values = [6,7]
 --      appendEveryElem test values
 --      > [[1,1,1,6],[2,2,2,7]]
---appendEveryElem :: [[a]] -> [a] -> [[a]]
 appendEveryElem :: [[a]] -> [a] -> [[a]]
 appendEveryElem []      _     = []
 appendEveryElem _       []    = []
@@ -22,6 +21,7 @@ appendEveryElem (x:xs) (v:vs) = [x ++ [v]] ++ appendEveryElem xs vs
 removeDups :: (Ord a) => [a] -> [a]
 removeDups = map head . List.group . List.sort
 
+zapWith :: (t -> t -> t) -> [t] -> [t] -> [t]
 zapWith f    []     ys  = ys
 zapWith f    xs     []  = xs
 zapWith f (x:xs) (y:ys) = f x y : zapWith f xs ys

@@ -100,36 +100,36 @@ filterOutRowsAndColumnsWithZero = List.filter (\(c, r) -> not (r `elem` getZeroI
 
 
 -- Checks if given solution (gas placement) has a correct number of gas in every column
-checkColumns :: (Num a, Eq a) => 
+hasCorrectColumnLabel :: (Num a, Eq a) => 
             [(a, t)] -> -- gasPlacement
             Bool
-checkColumns g = checkColumns' inputColumns g 0
+hasCorrectColumnLabel g = hasCorrectColumnLabel' inputColumns g 0
 
-checkColumns' :: (Num a, Eq a) => 
+hasCorrectColumnLabel' :: (Num a, Eq a) => 
               [Int] -> -- list of columns labels
               [(a, t)] -> -- solution (gas placement)
               a -> -- current index of inputColumns
               Bool
-checkColumns' []     g id = True
-checkColumns' (x:xs) g id = 
+hasCorrectColumnLabel' []     g id = True
+hasCorrectColumnLabel' (x:xs) g id = 
     if ((List.length gasesAtColumn) <= x) then 
-        checkColumns' xs g (id + 1)
+        hasCorrectColumnLabel' xs g (id + 1)
     else False
     where gasesAtColumn = List.filter (\(c, r) -> c == id) g          
 
 
 -- Checks if given solution (gas placement) has a correct number of gas in every row
-checkRows :: (Num a, Eq a) => [(t, a)] -> Bool
-checkRows g = checkRows' inputRows g 0
+hasCorrectRowLabel :: (Num a, Eq a) => [(t, a)] -> Bool
+hasCorrectRowLabel g = hasCorrectRowLabel' inputRows g 0
 
-checkRows' :: (Num a, Eq a) => 
+hasCorrectRowLabel' :: (Num a, Eq a) => 
               [Int] -> -- list of rows labels
               [(t, a)] -> -- solution (gas placement)
               a -> -- current index of inputRows
               Bool
-checkRows' []     g id = True
-checkRows' (x:xs) g id = if (List.length gasesAtRow <= x) then 
-                              checkRows' xs g (id + 1)
+hasCorrectRowLabel' []     g id = True
+hasCorrectRowLabel' (x:xs) g id = if (List.length gasesAtRow <= x) then 
+                              hasCorrectRowLabel' xs g (id + 1)
                           else False
     where gasesAtRow = List.filter (\(c, r) -> r == id) g
 
@@ -145,17 +145,17 @@ placesNotForGas' (x, y) = [
                             (x-1, y-1), (x-1, y+1)
                           ]
 
--- Checks if on the list there are two elements (gas), which are placed next to each other
-isTouchingOneFromTheList  l           = isTouchingOneFromTheList' l l
-isTouchingOneFromTheList' [x]    _    = False
-isTouchingOneFromTheList' (x:xs) list = if x `elem` (placesNotForGas list) then True
-                                    else isTouchingOneFromTheList (xs) 
+-- Checks if on the list there are two gas, which are placed next to each other
+existTwoGasTouchingEachOther  l           = existTwoGasTouchingEachOther' l l
+existTwoGasTouchingEachOther' [x]    _    = False
+existTwoGasTouchingEachOther' (x:xs) list = if x `elem` (placesNotForGas list) then True
+                                    else existTwoGasTouchingEachOther (xs) 
 
 -- Generates a list of all solutions. One solution is a list of gas coordinates.
 findSolutions :: [[(Int, Int)]]
-findSolutions = filterCombs (\x -> (checkColumns x) == True && 
-                                   (checkRows x) == True &&
-                                   (isTouchingOneFromTheList x) == False)
+findSolutions = filterCombs (\x -> (hasCorrectColumnLabel x) == True && 
+                                   (hasCorrectRowLabel x) == True &&
+                                   (existTwoGasTouchingEachOther x) == False)
                   (length houses) filterOutRowsAndColumnsWithZero 
 
 getSolution = getSolution' findSolutions
@@ -165,14 +165,16 @@ getSolution' solutions = if List.length solutions == 1 then solutions !! 0
 
 
 
+-- *************************************
+-- Part of code used for pretty printing
+-- *************************************
 
-
--- initialize a board with empty values
+-- Initialize a board with empty values
 emptyBoard :: Array (Int,Int) String
 emptyBoard = array ((0,0), (columnLength, rowsLength)) 
         [ ((c, r), emptyDesc) | c <- [0..columnLength], r <- [0..rowsLength]]
 
--- place houses on a board
+-- Place houses on a board
 board :: Array (Int, Int) String
 board = emptyBoard Data.Array.// [ (id, houseDesc) | id <- houses ]
 
@@ -205,6 +207,8 @@ prettyPrint' arr = do printColumnsNumbers
 
 prettyPrint :: [(Int, Int)] -> String -> IO ()
 prettyPrint placement desc = prettyPrint' (listForPrettyPrint placement desc)
+
+
 
 
 main = do putStrLn "Input data:"
