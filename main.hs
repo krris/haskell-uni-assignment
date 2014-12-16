@@ -208,11 +208,12 @@ prettyPrint' arr = do printColumnsNumbers
 prettyPrint :: [(Int, Int)] -> String -> IO ()
 prettyPrint placement desc = prettyPrint' (listForPrettyPrint placement desc)
 
-
+printOnlyHouses :: IO ()
+printOnlyHouses = prettyPrint [] ""
 
 
 main = do putStrLn "Input data:"
-          prettyPrint houses houseDesc
+          printOnlyHouses
           putStrLn "\nSolution:" 
           prettyPrint getSolution gasDesc
 
