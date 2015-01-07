@@ -1,7 +1,10 @@
 import System.IO  
 import Data.Array 
 import Data.Maybe (fromJust)
+import Data.Char 
+import Data.List.Split
 import Utils
+import Validation
 import qualified Data.List as List
 
 
@@ -189,31 +192,49 @@ rows arr = [[arr ! (c,r) | c <- [clow .. chigh]] | r <- [rlow .. rhigh]]
     ((clow, rlow),(chigh,rhigh)) = bounds arr
 
 -- Add to every row a corresponding number from inputRows
-rowsWithId arr = appendEveryElem (rows arr) (map show inputRows)
+rowsWithId dat arr = appendEveryElem (rows arr) (map show (getRow dat))
 
-rowStrings :: Array (Int,Int) String -> [String]
-rowStrings arr = [unwords (List.intersperse "|" row) | row <- rowsWithId arr]
+rowStrings :: String -> Array (Int,Int) String -> [String]
+rowStrings dat arr = [unwords (List.intersperse "|" row) | row <- rowsWithId dat arr]
 
-tableString :: Array (Int,Int) String -> String
-tableString arr = unlines (rowStrings arr)
+tableString :: String -> Array (Int,Int) String -> String
+tableString dat arr = unlines (rowStrings dat arr)
 
 -- Print inputColumns
-printColumnsNumbers :: IO ()
-printColumnsNumbers = putStrLn (unwords (List.intersperse "|" (map show inputColumns)))
+printColumnsNumbers :: String -> IO ()
+printColumnsNumbers dat = putStrLn (unwords (List.intersperse "|" (map show (getColumn dat))))
 
-prettyPrint' :: Array (Int,Int) String -> IO ()
-prettyPrint' arr = do printColumnsNumbers
-                      putStr (tableString arr)
+prettyPrint' :: String -> Array (Int,Int) String -> IO ()
+prettyPrint' dat arr = do 
+						printColumnsNumbers dat;
+						putStr (tableString dat arr)
 
-prettyPrint :: [(Int, Int)] -> String -> IO ()
-prettyPrint placement desc = prettyPrint' (listForPrettyPrint placement desc)
+prettyPrint :: [(Int, Int)] -> String -> String -> IO ()
+prettyPrint placement desc dat = prettyPrint' dat (listForPrettyPrint placement desc)
 
-printOnlyHouses :: IO ()
-printOnlyHouses = prettyPrint [] ""
+printOnlyHouses :: String -> IO ()
+printOnlyHouses dat = prettyPrint [] "" dat
 
 
-main = do putStrLn "Input data:"
-          printOnlyHouses
+makeValidation :: String -> String
+makeValidation x | mainValidation x = "Input data are correct"
+				 | otherwise = "Error of validation input data"
+
+getRow :: String -> [Int]
+getRow x = getColumnOrRow((lines x) !! 0)
+
+getColumn :: String -> [Int]
+getColumn x = getColumnOrRow((lines x) !! 1)
+
+
+				 
+main = do putStrLn "Put name of input file with data:";
+		  nameOfFile <- getLine;
+		  cont <- readFile nameOfFile;
+		  putStrLn "Start of validation...";
+		  putStrLn $ makeValidation cont;
+		  putStrLn "Input data:"
+          printOnlyHouses cont
           putStrLn "\nSolution:" 
-          prettyPrint getSolution gasDesc
+          prettyPrint getSolution gasDesc cont
 

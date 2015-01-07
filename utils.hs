@@ -1,11 +1,6 @@
 module Utils where
 import qualified Data.List as List
 
--- Trim string
-trim :: String -> String
-trim x = (unwords (words x))
-
-
 -- Delele all elements which exist in xs from ys
 deleteAll :: Eq a => [a] -> [a] -> [a]
 deleteAll xs ys = filter (\x -> not ( x `elem` xs)) ys
