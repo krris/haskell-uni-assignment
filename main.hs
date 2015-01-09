@@ -210,18 +210,16 @@ tableString :: String -> Array (Int,Int) String -> String
 tableString dat arr = unlines (rowStrings dat arr)
 
 -- Print inputColumns
-printColumnsNumbers :: String -> IO ()
-printColumnsNumbers dat = putStrLn (unwords (List.intersperse "|" (map show (getColumn dat))))
+printColumnsNumbers :: String -> String
+printColumnsNumbers dat = (unwords (List.intersperse "|" (map show (getColumn dat))))
 
-prettyPrint' :: String -> Array (Int,Int) String -> IO ()
-prettyPrint' dat arr = do 
-						printColumnsNumbers dat;
-						putStr (tableString dat arr)
+prettyPrint' :: String -> Array (Int,Int) String -> String
+prettyPrint' dat arr = 	printColumnsNumbers dat ++ "\n" ++ (tableString dat arr)
 
-prettyPrint :: String -> [(Int, Int)] -> String -> IO ()
+prettyPrint :: String -> [(Int, Int)] -> String -> String
 prettyPrint dat placement desc = prettyPrint' dat (listForPrettyPrint dat placement desc)
 
-printOnlyHouses :: String -> IO ()
+printOnlyHouses :: String -> String
 printOnlyHouses dat = prettyPrint dat [] "" 
 
 
@@ -275,8 +273,7 @@ main = do putStrLn "Put name of input file with data:";
 		  putStrLn "Start of validation...";
 		  putStrLn $ makeValidation cont;
 		  putStrLn "Input data:";
-          printOnlyHouses cont;
+          putStrLn $ printOnlyHouses cont;
           putStrLn "\nSolution:" 
-          prettyPrint cont (getSolution cont) gasDesc 
-		  
-		  --saveStringOnFile ( show (prettyPrint cont (getSolution cont) gasDesc));
+          putStrLn (prettyPrint cont (getSolution cont) gasDesc);
+		  saveStringOnFile (prettyPrint cont (getSolution cont) gasDesc);
