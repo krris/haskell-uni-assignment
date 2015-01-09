@@ -16,12 +16,12 @@ import qualified Data.List as List
 --houses :: [(Int, Int)]
 --houses = [(0,4),(1,0),(2,3),(2,5),(4,3),(4,4),(5,5)]
 
-inputRows :: [Int]
-inputRows = [1, 2, 0, 3, 0, 3]
-inputColumns :: [Int]
-inputColumns = [2, 1, 1, 2, 1, 2]  
-houses :: [(Int, Int)]
-houses = [(0,4),(1,1),(1,3),(2,5),(3,4),(4,0),(4,4),(4,5),(5,2)]
+inputRows_ :: [Int]
+inputRows_ = [1, 2, 0, 3, 0, 3]
+inputColumns_ :: [Int]
+inputColumns_ = [2, 1, 1, 2, 1, 2]  
+houses_ :: [(Int, Int)]
+houses_ = [(0,4),(1,1),(1,3),(2,5),(3,4),(4,0),(4,4),(4,5),(5,2)]
 
 --inputRows :: [Int]
 --inputRows = [5, 1, 3, 2, 5, 1, 3, 1, 4, 3]
@@ -77,8 +77,8 @@ gasDesc     = "+"
 emptyDesc   = " "
 delimiter   = "|"
 
-columnLength = length inputColumns - 1 --(length (getColumn dat) - 1)
-rowsLength   = length inputRows - 1 --(length (getRow dat) - 1)
+columnLength_ = length inputColumns_ - 1 --(length (getColumn dat) - 1)
+rowsLength_   = length inputRows_ - 1 --(length (getRow dat) - 1)
 
 --houses  = (getHouses dat)
 --inputColumns = (getColumn dat)
@@ -104,8 +104,8 @@ getZeroIndices' n   (x:xs)  = if x == 0 then [n] ++ getZeroIndices' (n+1) xs
 -- Filter out every gas which is placed in column/row labeled with 0
 filterOutRowsAndColumnsWithZero :: String -> [(Int, Int)]
 filterOutRowsAndColumnsWithZero dat = List.filter (\(c, r) -> not (r `elem` getZeroIndices (getRow dat)) && 
-                                                          not (c `elem` getZeroIndices (getColumn dat))) $
-                                  gasPossiblePlacement dat
+                                                          not (c `elem` getZeroIndices (getColumn dat))) 
+                                  (gasPossiblePlacement dat)
 
 
 
@@ -167,10 +167,10 @@ findSolutions :: String -> [[(Int, Int)]]
 findSolutions dat = filterCombs (\x -> (hasCorrectColumnLabel dat x) == True && 
                                    (hasCorrectRowLabel dat x) == True &&
                                    (existTwoGasTouchingEachOther x) == False)
-                  (length (getHouses dat)) $ filterOutRowsAndColumnsWithZero dat
+                  (length (getHouses dat))  (filterOutRowsAndColumnsWithZero dat)
 
 getSolution :: String -> [(Int, Int)]
-getSolution dat = getSolution' $ findSolutions dat
+getSolution dat = getSolution' (findSolutions dat)
 getSolution' solutions = if List.length solutions == 1 then solutions !! 0
                         else error "There is more than one solution for given data."
 
@@ -235,6 +235,8 @@ getRow x = getColumnOrRow((lines x) !! 0)
 getColumn :: String -> [Int]
 getColumn x = getColumnOrRow((lines x) !! 1)
 
+getHouses :: String -> [(Int,Int)]
+getHouses x = getHousesFromString((lines x) !! 2)
 
 				 
 main = do putStrLn "Put name of input file with data:";

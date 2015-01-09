@@ -148,8 +148,8 @@ convertToNumber x = read $ trim x
 ----
 
 ----
-getHouses :: String -> [(Int,Int)]
-getHouses x = makeTuples $ removeComma $ splitOnBrackets (tail $ init x)
+getHousesFromString :: String -> [(Int,Int)]
+getHousesFromString x = makeTuples $ removeComma $ splitOnBrackets (tail $ init x)
 
 
 --remove , from ["4,3", ", ", "2,1"] 
