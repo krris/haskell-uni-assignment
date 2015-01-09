@@ -4,86 +4,15 @@ import Data.Maybe (fromJust)
 import Data.Char 
 import Data.List.Split
 import Utils
-import Validation
+import ValidationAndConvertion
 import qualified Data.List as List
 
-
- --input data - it will be read from file (TODO)
---inputRows :: [Int]
---inputRows = [1, 0, 2, 1, 2, 1]
---inputColumns :: [Int]
---inputColumns = [1, 1, 2, 1, 1, 1]  
---houses :: [(Int, Int)]
---houses = [(0,4),(1,0),(2,3),(2,5),(4,3),(4,4),(5,5)]
-
-inputRows_ :: [Int]
-inputRows_ = [1, 2, 0, 3, 0, 3]
-inputColumns_ :: [Int]
-inputColumns_ = [2, 1, 1, 2, 1, 2]  
-houses_ :: [(Int, Int)]
-houses_ = [(0,4),(1,1),(1,3),(2,5),(3,4),(4,0),(4,4),(4,5),(5,2)]
-
---inputRows :: [Int]
---inputRows = [5, 1, 3, 2, 5, 1, 3, 1, 4, 3]
---inputColumns :: [Int]
---inputColumns = [4, 0, 3, 1, 2, 1, 3, 2, 0, 5, 0, 3, 1, 3]  
---houses :: [(Int, Int)]
---houses = [
---          (0,0), (0,8),
---          (1,0), (1,3), (1,4), (1,5),
---          (2,7),
---          (3,5),
---          (4,9),
---          (5,0),(5,3),
---          (6,3),(6,7),(6,8),
---          (7,0),
---          (8,2),(8,4),
---          (9,1),(9,5),(9,9),
---          (10,4),
---          (11,5),(11,7),
---          (12,1),(12,2),
---          (13,2),(13,5),(13,8)
---          ]
-
---inputRows :: [Int]
---inputRows = [5, 1, 4, 1, 4, 2, 4, 2, 1, 4]
---inputColumns :: [Int]
---inputColumns = [3,2,0,5,0,5,0,2,2,3,0,2,2,2]  
---houses :: [(Int, Int)]
---houses = [
---          (0,1), (0,5), (0, 6),
---          (1,3), (1,9),
---          (2,5), (2,9),
-
---          (4,0), (4,2), (4,3), (4,4), (4,7),
---          (5,5),
---          (6,0),(6,9),
---          (7,0), (7,6),
---          (8,2),(8,5),(8,8),
---          (9,5),
---          (10,0),
---          (11,2),
---          (12,5),(12,6), (12,8),
---          (13,0)
---          ]
-
-gasPlacement :: [(Int, Int)]
-gasPlacement = [(0,3),(1,5),(2,0),(2,2),(3,4),(4,2),(5,4)]
-wrongPlacement = [(0,5),(1,3),(2,0),(2,2),(3,4),(4,2),(5,4)]
 
 -- House and gas descriptors used for displaying result
 houseDesc   = "H"
 gasDesc     = "+"
 emptyDesc   = " "
 delimiter   = "|"
-
-columnLength_ = length inputColumns_ - 1 --(length (getColumn dat) - 1)
-rowsLength_   = length inputRows_ - 1 --(length (getRow dat) - 1)
-
---houses  = (getHouses dat)
---inputColumns = (getColumn dat)
---inputRows = (getRow dat)
-
 
 
 -- Generates all possible coordinates where gas can be placed
@@ -263,6 +192,7 @@ writeOnFile fileContent name | (name == []) = (do putStrLn "Name of file can't b
 												  n <- getLine;
 												  writeOnFile fileContent n;)
 							 | otherwise = do writeFile name fileContent;
+											  putStrLn ("Result save on file " ++ name);
 				 
 -----------------------------------------------------------------------
 

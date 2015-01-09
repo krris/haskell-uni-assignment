@@ -1,19 +1,7 @@
-import System.IO
+module ValidationAndConvertion where
 import Data.Char 
 import Data.List.Split
 
-main = do 
-	cont <- readFile "input-file.txt"
-	putStrLn cont
-	putStrLn ""
-	print (mainValidation cont)
-	print ( pierw cont ) 
-	print ( drug cont )
-	print ( trzec cont )
-	
-
-
-	
 	
 -----------Validation--------------	
 
@@ -160,8 +148,8 @@ convertToNumber x = read $ trim x
 ----
 
 ----
-getHouses :: String -> [(Int,Int)]
-getHouses x = makeTuples $ removeComma $ splitOnBrackets (tail $ init x)
+getHousesFromString :: String -> [(Int,Int)]
+getHousesFromString x = makeTuples $ removeComma $ splitOnBrackets (tail $ init x)
 
 
 --remove , from ["4,3", ", ", "2,1"] 
@@ -231,116 +219,3 @@ checkLengthOfHouses row column houses = if ((length houses) <= maxNumberOfHouses
 
 
 -------------------------------------------------------------------------------
-
-
-
-
-
-
-
-pierw :: String -> [Int]
-pierw x = sprawdzCzyokTab ((lines x) !! 0)
-
-drug :: String -> [Int]
-drug x = sprawdzCzyokTab ((lines x) !! 1)
-
-trzec :: String -> [(Int,Int)]
-trzec x = makeTuples $ splitSup((lines x) !! 2)
-
-
-isNawiasOtw :: Char -> Bool 
-isNawiasOtw x =  x =='['
-isNawiasZam :: Char -> Bool 
-isNawiasZam x =  x ==']'
-isNawiasOtwZ :: Char -> Bool 
-isNawiasOtwZ x =  x =='('
-isNawiasZamZ :: Char -> Bool 
-isNawiasZamZ x =  x ==')'
-isNaw :: String -> Bool
-isNaw x = (isNawiasOtw (head x)) && (isNawiasZam (last x))
-isPrzec :: Char -> Bool 
-isPrzec x =  x ==','
-isSpac :: Char -> Bool 
-isSpac x =  x ==' '
-isZaokrNaw :: Char -> Bool 
-isZaokrNaw x =  (x =='(') || (x==')') 
-
-isCzyNawCzyPrzecChar :: Char -> Bool
-isCzyNawCzyPrzecChar a = (isDigit a) || (isPrzec a) || (isSpac a) || (isZaokrNaw a)
-
-czyNawCzyPrzecString :: String -> Bool
-czyNawCzyPrzecString [] = True
-czyNawCzyPrzecString (x:xs) = (isCzyNawCzyPrzecChar x) && (czyNawCzyPrzecString xs)
-
-
-czyPoprawnaForma :: String -> Bool
-czyPoprawnaForma x = (isNaw x) && (czyNawCzyPrzecString (tail(init(x)))) 
-
-
-
-
-przejdzPoWszystkich :: String -> String
-przejdzPoWszystkich [] = []
-przejdzPoWszystkich (x:xs) | isDigit x = sprLiczby (x:xs)
-						   | isNawiasOtwZ x = przejdzPoWszystkich xs
-						   | isSpac x = przejdzPoWszystkich xs
-						   | isPrzec x = xs
-						   | isNawiasZamZ x = []
-
-sprLiczby :: String -> String
-sprLiczby [] = []
-sprLiczby (x:xs) | not (isDigit x) = []
-			     | otherwise = x : (sprLiczby xs)
-
-						   
-www :: String -> Bool
-www [] = True
-www (x:xs) = (isZaokrNaw x) && (sprLiczb xs) 
-
-sprLiczb :: String -> Bool
-sprLiczb [] = True
-sprLiczb (x:xs) = (isDigit x) && ((isPrzec (head xs)) || (sprLiczb xs))  
-
-
-
-splitSup :: String -> [String]
-splitSup [] = []
-splitSup x | (haveBracket $ rest x) = (spl x) : (splitSup $ rest x)
-		   | otherwise = [spl x]
-
-haveBracket :: String -> Bool
-haveBracket [] = False
-haveBracket (x:xs) | isNawiasZamZ x = True
-				   | otherwise = haveBracket xs
-		   
-rest :: String -> String
-rest x | (c/=[]) = tail $ c
-	   | otherwise = []
-	   where c = dropWhile (/=')') x
-
-spl :: String -> String
-spl x = firstBracket $ lastBracket x
-
-firstBracket :: String -> String
-firstBracket x = drop (length c + 1) x
-				where c = takeWhile (/='(') x				
-lastBracket :: String -> String
-lastBracket x = takeWhile (/=')') x			
-				
-
-czyNumer :: String -> Bool
-czyNumer [] = True
-czyNumer (x:xs) = (isDigit x)  && (czyNumer xs) 
-
-
-
-sprawdzCzyokTab :: String  -> [Int]
-sprawdzCzyokTab x | x=="" = error "puste"
-			   | not (czyPoprawnaForma x) = error "nie prawidłowe dane"
-	           | otherwise  = map toNumber (splitOn "," (tail(init(x))))
-
-
-toNumber :: String -> Int
-toNumber x | x=="" = error "nieprawidlowe dane"
-		   | czyNumer (trim x) = read (trim x)
-		   | otherwise = error "nieprawidlowe dane"
