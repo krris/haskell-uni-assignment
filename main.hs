@@ -77,16 +77,22 @@ gasDesc     = "+"
 emptyDesc   = " "
 delimiter   = "|"
 
-columnLength = length inputColumns - 1
-rowsLength   = length inputRows - 1
+columnLength = length inputColumns - 1 --(length (getColumn dat) - 1)
+rowsLength   = length inputRows - 1 --(length (getRow dat) - 1)
+
+--houses  = (getHouses dat)
+--inputColumns = (getColumn dat)
+--inputRows = (getRow dat)
+
+
 
 -- Generates all possible coordinates where gas can be placed
-gasPossiblePlacement :: [(Int, Int)]
-gasPossiblePlacement = removeDups (deleteAll houses
-                       [ (x + 1, y) | (x,y) <- houses, x < columnLength] ++
-                       [ (x - 1, y) | (x,y) <- houses, x > 0] ++
-                       [ (x, y + 1) | (x,y) <- houses, y < rowsLength] ++
-                       [ (x, y - 1) | (x,y) <- houses, y > 0])
+gasPossiblePlacement :: String -> [(Int, Int)]
+gasPossiblePlacement dat = removeDups (deleteAll (getHouses dat)
+                       [ (x + 1, y) | (x,y) <- (getHouses dat), x < (length (getColumn dat) - 1)] ++
+                       [ (x - 1, y) | (x,y) <- (getHouses dat), x > 0] ++
+                       [ (x, y + 1) | (x,y) <- (getHouses dat), y < (length (getRow dat) - 1)] ++
+                       [ (x, y - 1) | (x,y) <- (getHouses dat), y > 0])
 
 
 -- Get all indices of elements which has value equal to 0 from a list  
@@ -96,17 +102,19 @@ getZeroIndices' n   (x:xs)  = if x == 0 then [n] ++ getZeroIndices' (n+1) xs
                               else getZeroIndices' (n+1) xs
 
 -- Filter out every gas which is placed in column/row labeled with 0
-filterOutRowsAndColumnsWithZero = List.filter (\(c, r) -> not (r `elem` getZeroIndices inputRows) && 
-                                                          not (c `elem` getZeroIndices inputColumns))
-                                  gasPossiblePlacement
+filterOutRowsAndColumnsWithZero :: String -> [(Int, Int)]
+filterOutRowsAndColumnsWithZero dat = List.filter (\(c, r) -> not (r `elem` getZeroIndices (getRow dat)) && 
+                                                          not (c `elem` getZeroIndices (getColumn dat))) $
+                                  gasPossiblePlacement dat
 
 
 
 -- Checks if given solution (gas placement) has a correct number of gas in every column
 hasCorrectColumnLabel :: (Num a, Eq a) => 
-            [(a, t)] -> -- gasPlacement
+            String -> 
+			[(a, t)] -> -- gasPlacement
             Bool
-hasCorrectColumnLabel g = hasCorrectColumnLabel' inputColumns g 0
+hasCorrectColumnLabel dat g = hasCorrectColumnLabel' (getColumn dat) g 0
 
 hasCorrectColumnLabel' :: (Num a, Eq a) => 
               [Int] -> -- list of columns labels
@@ -122,8 +130,8 @@ hasCorrectColumnLabel' (x:xs) g id =
 
 
 -- Checks if given solution (gas placement) has a correct number of gas in every row
-hasCorrectRowLabel :: (Num a, Eq a) => [(t, a)] -> Bool
-hasCorrectRowLabel g = hasCorrectRowLabel' inputRows g 0
+hasCorrectRowLabel :: (Num a, Eq a) => String -> [(t, a)] -> Bool
+hasCorrectRowLabel dat g = hasCorrectRowLabel' (getRow dat) g 0
 
 hasCorrectRowLabel' :: (Num a, Eq a) => 
               [Int] -> -- list of rows labels
@@ -155,13 +163,14 @@ existTwoGasTouchingEachOther' (x:xs) list = if x `elem` (placesNotForGas list) t
                                     else existTwoGasTouchingEachOther (xs) 
 
 -- Generates a list of all solutions. One solution is a list of gas coordinates.
-findSolutions :: [[(Int, Int)]]
-findSolutions = filterCombs (\x -> (hasCorrectColumnLabel x) == True && 
-                                   (hasCorrectRowLabel x) == True &&
+findSolutions :: String -> [[(Int, Int)]]
+findSolutions dat = filterCombs (\x -> (hasCorrectColumnLabel dat x) == True && 
+                                   (hasCorrectRowLabel dat x) == True &&
                                    (existTwoGasTouchingEachOther x) == False)
-                  (length houses) filterOutRowsAndColumnsWithZero 
+                  (length (getHouses dat)) $ filterOutRowsAndColumnsWithZero dat
 
-getSolution = getSolution' findSolutions
+getSolution :: String -> [(Int, Int)]
+getSolution dat = getSolution' $ findSolutions dat
 getSolution' solutions = if List.length solutions == 1 then solutions !! 0
                         else error "There is more than one solution for given data."
 
@@ -173,17 +182,17 @@ getSolution' solutions = if List.length solutions == 1 then solutions !! 0
 -- *************************************
 
 -- Initialize a board with empty values
-emptyBoard :: Array (Int,Int) String
-emptyBoard = array ((0,0), (columnLength, rowsLength)) 
-        [ ((c, r), emptyDesc) | c <- [0..columnLength], r <- [0..rowsLength]]
+emptyBoard :: String -> Array (Int,Int) String
+emptyBoard dat = array ((0,0), ((length (getColumn dat) - 1), (length (getRow dat) - 1))) 
+        [ ((c, r), emptyDesc) | c <- [0..(length (getColumn dat) - 1)], r <- [0..(length (getRow dat) - 1)]]
 
 -- Place houses on a board
-board :: Array (Int, Int) String
-board = emptyBoard Data.Array.// [ (id, houseDesc) | id <- houses ]
+board :: String -> Array (Int, Int) String
+board dat = emptyBoard dat Data.Array.// [ (id, houseDesc) | id <- (getHouses dat) ]
 
 -- Prepares a list to be pretty printed
-listForPrettyPrint :: [(Int, Int)] -> String -> Array (Int, Int) String
-listForPrettyPrint list desc = board Data.Array.// [ (id, desc) | id <- list ]
+listForPrettyPrint :: String -> [(Int, Int)] -> String -> Array (Int, Int) String
+listForPrettyPrint dat list desc = board dat Data.Array.// [ (id, desc) | id <- list ]
 
 -- Pretty print for a board
 rows :: Array (Int,Int) a -> [[a]]
@@ -209,11 +218,11 @@ prettyPrint' dat arr = do
 						printColumnsNumbers dat;
 						putStr (tableString dat arr)
 
-prettyPrint :: [(Int, Int)] -> String -> String -> IO ()
-prettyPrint placement desc dat = prettyPrint' dat (listForPrettyPrint placement desc)
+prettyPrint :: String -> [(Int, Int)] -> String -> IO ()
+prettyPrint dat placement desc = prettyPrint' dat (listForPrettyPrint dat placement desc)
 
 printOnlyHouses :: String -> IO ()
-printOnlyHouses dat = prettyPrint [] "" dat
+printOnlyHouses dat = prettyPrint dat [] "" 
 
 
 makeValidation :: String -> String
@@ -233,8 +242,8 @@ main = do putStrLn "Put name of input file with data:";
 		  cont <- readFile nameOfFile;
 		  putStrLn "Start of validation...";
 		  putStrLn $ makeValidation cont;
-		  putStrLn "Input data:"
-          printOnlyHouses cont
+		  putStrLn "Input data:";
+          printOnlyHouses cont;
           putStrLn "\nSolution:" 
-          prettyPrint getSolution gasDesc cont
+          prettyPrint cont (getSolution cont) gasDesc 
 
