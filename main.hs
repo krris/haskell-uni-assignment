@@ -238,6 +238,36 @@ getColumn x = getColumnOrRow((lines x) !! 1)
 getHouses :: String -> [(Int,Int)]
 getHouses x = getHousesFromString((lines x) !! 2)
 
+
+--------------------------save result to file-----------------------------------------
+
+saveStringOnFile :: String -> IO()
+saveStringOnFile str = do putStrLn "Save result to file? [Y/N]";
+						  decision <- getLine;
+		                  askToSave str decision;
+		  
+
+
+askToSave :: String -> String -> IO()
+askToSave fileContent decision 	| (decision == "Y" || decision == "y") = do askNameOfFile fileContent;
+								| (decision == "N" || decision == "n") = do return ();
+								| otherwise = do putStrLn "Put Y or N:";
+												 decision <- getLine;
+												 askToSave fileContent decision;
+
+askNameOfFile :: String -> IO()
+askNameOfFile fileContent = do putStrLn "Put name of the output file:";
+							   name <- getLine;
+							   writeOnFile fileContent name;
+				   
+writeOnFile :: String -> String -> IO()
+writeOnFile fileContent name | (name == []) = (do putStrLn "Name of file can't be null. Put it again:";
+												  n <- getLine;
+												  writeOnFile fileContent n;)
+							 | otherwise = do writeFile name fileContent;
+				 
+-----------------------------------------------------------------------
+
 				 
 main = do putStrLn "Put name of input file with data:";
 		  nameOfFile <- getLine;
@@ -248,4 +278,5 @@ main = do putStrLn "Put name of input file with data:";
           printOnlyHouses cont;
           putStrLn "\nSolution:" 
           prettyPrint cont (getSolution cont) gasDesc 
-
+		  
+		  --saveStringOnFile ( show (prettyPrint cont (getSolution cont) gasDesc));
