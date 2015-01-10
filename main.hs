@@ -14,13 +14,18 @@ gasDesc     = "+"
 emptyDesc   = " "
 delimiter   = "|"
 
+-- Length of column label
+columnLabelLength dat    = length (getColumn dat) - 1
+-- Length of row label
+rowLabelLength dat  = length (getRow dat) - 1
+
 
 -- Generates all possible coordinates where gas can be placed
 gasPossiblePlacement :: String -> [(Int, Int)]
 gasPossiblePlacement dat = removeDups (deleteAll (getHouses dat)
-                       [ (x + 1, y) | (x,y) <- (getHouses dat), x < (length (getColumn dat) - 1)] ++
+                       [ (x + 1, y) | (x,y) <- (getHouses dat), x < columnLabelLength dat] ++
                        [ (x - 1, y) | (x,y) <- (getHouses dat), x > 0] ++
-                       [ (x, y + 1) | (x,y) <- (getHouses dat), y < (length (getRow dat) - 1)] ++
+                       [ (x, y + 1) | (x,y) <- (getHouses dat), y < rowLabelLength dat] ++
                        [ (x, y - 1) | (x,y) <- (getHouses dat), y > 0])
 
 
@@ -112,8 +117,8 @@ getSolution' solutions = if List.length solutions == 1 then solutions !! 0
 
 -- Initialize a board with empty values
 emptyBoard :: String -> Array (Int,Int) String
-emptyBoard dat = array ((0,0), ((length (getColumn dat) - 1), (length (getRow dat) - 1))) 
-        [ ((c, r), emptyDesc) | c <- [0..(length (getColumn dat) - 1)], r <- [0..(length (getRow dat) - 1)]]
+emptyBoard dat = array ((0,0), ((columnLabelLength dat), (rowLabelLength dat))) 
+        [ ((c, r), emptyDesc) | c <- [0..(columnLabelLength dat)], r <- [0..(rowLabelLength dat)]]
 
 -- Place houses on a board
 board :: String -> Array (Int, Int) String
