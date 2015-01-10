@@ -201,14 +201,14 @@ writeOnFile fileContent name | (name == []) = (do putStrLn "Name of file can't b
 				 
 -----------------------------------------------------------------------
 
-				 
-main = do putStrLn "Put name of input file with data:";
-		  nameOfFile <- getLine;
-		  cont <- readFile nameOfFile;
-		  putStrLn "Start of validation...";
-		  putStrLn $ makeValidation cont;
-		  putStrLn "Input data:";
-          putStrLn $ printOnlyHouses cont;
-          putStrLn "\nSolution:" 
-          putStrLn (prettyPrint cont (getSolution cont) gasDesc);
-		  saveStringOnFile (prettyPrint cont (getSolution cont) gasDesc);
+main = do
+  putStrLn "Put name of input file with data:"
+  nameOfFile <- getLine
+  cont <- readFile nameOfFile
+  putStrLn "Start of validation..."
+  putStrLn $ makeValidation cont
+  putStrLn "Input data:";
+	putStrLn $ printOnlyHouses cont
+  putStrLn "\nSolution:"
+  putStrLn (prettyPrint cont (getSolution cont) gasDesc)
+  saveStringOnFile (prettyPrint cont (getSolution cont) gasDesc)
